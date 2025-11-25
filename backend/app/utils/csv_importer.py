@@ -34,6 +34,13 @@ class CSVImporter:
         return sanitized or 'column'
     
     @staticmethod
+    def escape_identifier(name: str) -> str:
+        """Escape SQL identifier to handle reserved keywords"""
+        # SQLite uses double quotes to escape identifiers
+        # This handles reserved keywords like 'table', 'select', etc.
+        return f'"{name}"'
+    
+    @staticmethod
     def infer_sqlite_type(series: pd.Series) -> str:
         """Infer SQLite type from pandas Series"""
         # Check for datetime
@@ -102,11 +109,14 @@ class CSVImporter:
                 table_name = 'imported_data'
             table_name = CSVImporter.sanitize_table_name(table_name)
             
-            # Infer column types
+            # Infer column types and escape column names
             column_defs = []
+            escaped_columns = []
             for col in df.columns:
                 sql_type = CSVImporter.infer_sqlite_type(df[col])
-                column_defs.append(f"{col} {sql_type}")
+                escaped_col = CSVImporter.escape_identifier(col)
+                column_defs.append(f"{escaped_col} {sql_type}")
+                escaped_columns.append(escaped_col)
             
             # Create table
             create_table_sql = f"""
@@ -141,8 +151,9 @@ class CSVImporter:
                             else:
                                 values.append(val)
                     
+                    # Use escaped column names in INSERT statement
                     insert_sql = f"""
-                        INSERT INTO {table_name} ({', '.join(df.columns)})
+                        INSERT INTO {table_name} ({', '.join(escaped_columns)})
                         VALUES ({', '.join(placeholders)})
                     """
                     await conn.execute(text(insert_sql), tuple(values))
