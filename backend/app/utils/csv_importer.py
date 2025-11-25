@@ -133,30 +133,36 @@ class CSVImporter:
                 await conn.execute(text(create_table_sql))
                 
                 # Insert data
-                # Convert DataFrame to list of dicts for insertion
-                rows_inserted = 0
+                # Prepare all rows for bulk insert
+                all_rows = []
                 for _, row in df.iterrows():
                     # Prepare values, handling NaN as NULL
-                    values = []
-                    placeholders = []
+                    row_values = []
                     for col in df.columns:
-                        placeholders.append('?')
                         val = row[col]
                         if pd.isna(val):
-                            values.append(None)
+                            row_values.append(None)
                         else:
                             # Convert datetime to string if needed
                             if pd.api.types.is_datetime64_any_dtype(df[col]):
-                                values.append(val.strftime('%Y-%m-%d'))
+                                row_values.append(val.strftime('%Y-%m-%d'))
                             else:
-                                values.append(val)
-                    
-                    # Use escaped column names in INSERT statement
-                    insert_sql = f"""
-                        INSERT INTO {table_name} ({', '.join(escaped_columns)})
-                        VALUES ({', '.join(placeholders)})
-                    """
-                    await conn.execute(text(insert_sql), tuple(values))
+                                row_values.append(val)
+                    all_rows.append(row_values)
+                
+                # Create placeholders and SQL statement
+                placeholders = [f':p{i}' for i in range(len(df.columns))]
+                insert_sql = f"""
+                    INSERT INTO {table_name} ({', '.join(escaped_columns)})
+                    VALUES ({', '.join(placeholders)})
+                """
+                
+                # Insert all rows using executemany pattern
+                rows_inserted = 0
+                for row_values in all_rows:
+                    # Convert row to dict with named parameters
+                    params = {f'p{i}': val for i, val in enumerate(row_values)}
+                    await conn.execute(text(insert_sql), params)
                     rows_inserted += 1
                 
                 return {
