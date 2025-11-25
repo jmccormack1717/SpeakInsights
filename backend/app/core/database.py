@@ -152,9 +152,14 @@ class DatabaseManager:
         """Create a new database file"""
         db_path = self.get_database_path(user_id, dataset_id)
         if not db_path.exists():
-            # Create empty database by creating engine
+            # Create empty database by executing a simple query
+            # This ensures the SQLite file is actually created on disk
             engine = await self.get_engine(user_id, dataset_id)
-            await engine.dispose()
+            try:
+                async with engine.begin() as conn:
+                    await conn.execute(text("SELECT 1"))
+            finally:
+                await engine.dispose()
     
     async def close_all(self):
         """Close all database connections"""
