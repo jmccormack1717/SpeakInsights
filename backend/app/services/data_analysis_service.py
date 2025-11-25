@@ -105,7 +105,8 @@ class DataAnalysisService:
             
             analysis["columns"][col] = {
                 "type": col_type,
-                "nullable": df[col].isna().any()
+                # Convert to native bool to avoid numpy.bool_ serialization issues
+                "nullable": bool(df[col].isna().any())
             }
             
             # Calculate cardinality
@@ -128,6 +129,7 @@ class DataAnalysisService:
                 analysis["categorical_columns"].append(col)
             elif col_type == "datetime":
                 analysis["datetime_columns"].append(col)
+                # Ensure we store a native Python bool, not numpy.bool_
                 analysis["has_time_series"] = True
             else:
                 analysis["text_columns"].append(col)
