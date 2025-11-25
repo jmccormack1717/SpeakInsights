@@ -62,6 +62,15 @@ class SQLValidator:
         if sql.count('(') != sql.count(')'):
             return False, "Unbalanced parentheses in SQL query."
         
+        # Check for PostgreSQL/MySQL-specific syntax that SQLite doesn't support
+        # Check for FROM (VALUES ...) pattern (PostgreSQL syntax)
+        if re.search(r'\bFROM\s*\(\s*VALUES\b', sql_upper, re.IGNORECASE):
+            return False, "SQLite does not support 'FROM (VALUES ...)' syntax. Use actual table names or PRAGMA table_info() for column listings."
+        
+        # Check for VALUES clause in FROM (should use actual tables)
+        if re.search(r'\bFROM\s*\(\s*VALUES\s*\(', sql_upper, re.IGNORECASE):
+            return False, "SQLite does not support VALUES in FROM clause. Query actual tables from the schema."
+        
         return True, ""
     
     @classmethod

@@ -1,8 +1,11 @@
 """FastAPI application entry point"""
 import logging
 from pathlib import Path
-from fastapi import FastAPI
+from fastapi import FastAPI, Request, status
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
+from fastapi.exceptions import RequestValidationError
+from starlette.exceptions import HTTPException as StarletteHTTPException
 from app.config import settings
 from app.api.routes import query, datasets, schema
 from app.core.database import db_manager
@@ -23,19 +26,74 @@ app = FastAPI(
     debug=settings.debug
 )
 
-# CORS middleware
+# CORS middleware - MUST be added before other middleware
 app.add_middleware(
     CORSMiddleware,
     allow_origins=settings.cors_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
+    expose_headers=["*"],
 )
 
 # Include routers
 app.include_router(query.router, prefix="/api/v1", tags=["query"])
 app.include_router(datasets.router, prefix="/api/v1", tags=["datasets"])
 app.include_router(schema.router, prefix="/api/v1", tags=["schema"])
+
+
+# Exception handlers to ensure CORS headers are always included
+def get_cors_headers(request: Request) -> dict:
+    """Get CORS headers based on request origin"""
+    origin = request.headers.get("origin")
+    # Check if origin is in allowed origins
+    if origin and origin in settings.cors_origins:
+        return {
+            "Access-Control-Allow-Origin": origin,
+            "Access-Control-Allow-Credentials": "true",
+            "Access-Control-Allow-Methods": "*",
+            "Access-Control-Allow-Headers": "*",
+        }
+    # Fallback to first allowed origin if origin doesn't match
+    elif settings.cors_origins:
+        return {
+            "Access-Control-Allow-Origin": settings.cors_origins[0] if isinstance(settings.cors_origins, list) else str(settings.cors_origins).split(",")[0].strip(),
+            "Access-Control-Allow-Credentials": "true",
+            "Access-Control-Allow-Methods": "*",
+            "Access-Control-Allow-Headers": "*",
+        }
+    return {}
+
+
+@app.exception_handler(StarletteHTTPException)
+async def http_exception_handler(request: Request, exc: StarletteHTTPException):
+    """Handle HTTP exceptions with CORS headers"""
+    return JSONResponse(
+        status_code=exc.status_code,
+        content={"detail": exc.detail},
+        headers=get_cors_headers(request)
+    )
+
+
+@app.exception_handler(RequestValidationError)
+async def validation_exception_handler(request: Request, exc: RequestValidationError):
+    """Handle validation errors with CORS headers"""
+    return JSONResponse(
+        status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+        content={"detail": exc.errors()},
+        headers=get_cors_headers(request)
+    )
+
+
+@app.exception_handler(Exception)
+async def general_exception_handler(request: Request, exc: Exception):
+    """Handle all other exceptions with CORS headers"""
+    logger.error(f"Unhandled exception: {str(exc)}", exc_info=True)
+    return JSONResponse(
+        status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        content={"detail": f"Internal server error: {str(exc)}"},
+        headers=get_cors_headers(request)
+    )
 
 
 @app.on_event("startup")

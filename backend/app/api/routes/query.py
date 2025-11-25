@@ -97,10 +97,17 @@ async def execute_query(request: QueryRequest):
             )
         except Exception as e:
             logger.error(f"Failed to execute query: {str(e)}")
+            logger.error(f"SQL that failed: {sql}")
             logger.error(traceback.format_exc())
+            
+            # Provide detailed error message to help user understand what went wrong
+            error_detail = str(e)
+            if "syntax error" in error_detail.lower():
+                error_detail += f" The generated SQL was: {sql}"
+            
             raise HTTPException(
                 status_code=500,
-                detail=f"Failed to execute SQL query: {str(e)}"
+                detail=f"Failed to execute SQL query: {error_detail}"
             )
         
         # Step 4: Analyze data structure
