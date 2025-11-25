@@ -2,12 +2,9 @@
 import { useQueryStore } from '../stores/queryStore';
 import { ChartRenderer } from './ChartRenderer';
 import { AnalysisPanel } from './AnalysisPanel';
-import { ChevronDown, ChevronUp } from 'lucide-react';
-import { useState } from 'react';
 
 export function ResultsPanel() {
   const { currentResponse, error } = useQueryStore();
-  const [showRawData, setShowRawData] = useState(false);
 
   if (error) {
     return (
@@ -52,58 +49,6 @@ export function ResultsPanel() {
 
       {/* Textual Analysis */}
       <AnalysisPanel analysis={currentResponse.analysis} />
-
-      {/* Raw Data Toggle */}
-      {currentResponse.results.length > 0 && (
-        <div className="bg-si-surface rounded-2xl shadow-sm border border-si-border/70 overflow-hidden">
-          <button
-            onClick={() => setShowRawData(!showRawData)}
-            className="w-full px-5 py-4 flex items-center justify-between hover:bg-si-primary-soft/40 transition-colors"
-          >
-            <span className="font-medium text-si-text">
-              Raw data <span className="text-si-muted font-normal">({currentResponse.results.length} rows)</span>
-            </span>
-            {showRawData ? (
-              <ChevronUp className="w-5 h-5 text-si-muted" />
-            ) : (
-              <ChevronDown className="w-5 h-5 text-si-muted" />
-            )}
-          </button>
-          {showRawData && (
-            <div className="px-5 pb-5 border-t border-si-border/40">
-              <div className="mt-4 overflow-x-auto rounded-xl border border-si-border/60">
-                <table className="min-w-full divide-y divide-si-border/60 text-sm">
-                  <thead className="bg-si-surface/70">
-                    <tr>
-                      {Object.keys(currentResponse.results[0]).map((col) => (
-                        <th key={col} className="px-4 py-3 text-left text-xs font-semibold text-si-muted uppercase tracking-wider">
-                          {col}
-                        </th>
-                      ))}
-                    </tr>
-                  </thead>
-                  <tbody className="bg-si-surface divide-y divide-si-border/40">
-                    {currentResponse.results.slice(0, 50).map((row, idx) => (
-                      <tr key={idx} className="hover:bg-si-primary-soft/30 transition-colors">
-                        {Object.keys(row).map((col) => (
-                          <td key={col} className="px-4 py-3 text-si-text whitespace-nowrap">
-                            {row[col]?.toString() || ''}
-                          </td>
-                        ))}
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-                {currentResponse.results.length > 50 && (
-                  <div className="bg-si-surface/80 px-4 py-3 text-sm text-si-muted text-center border-t border-si-border/60">
-                    Showing first 50 of {currentResponse.results.length} rows
-                  </div>
-                )}
-              </div>
-            </div>
-          )}
-        </div>
-      )}
     </div>
   );
 }

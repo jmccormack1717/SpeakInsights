@@ -57,13 +57,14 @@ export function ChartRenderer({ config }: { config: VisualizationConfig }) {
                   stroke="#6b7280"
                   tick={{ fill: '#6b7280' }}
                 />
-                <Tooltip 
+                <Tooltip
                   cursor={false}
-                  contentStyle={{ 
-                    backgroundColor: 'white', 
+                  wrapperStyle={{ zIndex: 50 }}
+                  contentStyle={{
+                    backgroundColor: 'white',
                     border: '1px solid #e5e7eb',
                     borderRadius: '8px',
-                    boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)'
+                    boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
                   }}
                 />
                 <Legend wrapperStyle={{ paddingTop: '20px' }} />
@@ -93,13 +94,14 @@ export function ChartRenderer({ config }: { config: VisualizationConfig }) {
                   stroke="#6b7280"
                   tick={{ fill: '#6b7280' }}
                 />
-                <Tooltip 
+                <Tooltip
                   cursor={false}
-                  contentStyle={{ 
-                    backgroundColor: 'white', 
+                  wrapperStyle={{ zIndex: 50 }}
+                  contentStyle={{
+                    backgroundColor: 'white',
                     border: '1px solid #e5e7eb',
                     borderRadius: '8px',
-                    boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)'
+                    boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
                   }}
                 />
                 <Legend wrapperStyle={{ paddingTop: '20px' }} />
@@ -140,13 +142,14 @@ export function ChartRenderer({ config }: { config: VisualizationConfig }) {
                     <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                   ))}
                 </Pie>
-                <Tooltip 
+                <Tooltip
                   cursor={false}
-                  contentStyle={{ 
-                    backgroundColor: 'white', 
+                  wrapperStyle={{ zIndex: 50 }}
+                  contentStyle={{
+                    backgroundColor: 'white',
                     border: '1px solid #e5e7eb',
                     borderRadius: '8px',
-                    boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)'
+                    boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
                   }}
                 />
               </PieChart>
@@ -167,7 +170,7 @@ export function ChartRenderer({ config }: { config: VisualizationConfig }) {
               />
               <YAxis 
               />
-              <Tooltip cursor={false} />
+              <Tooltip cursor={false} wrapperStyle={{ zIndex: 50 }} />
               <Legend />
               <Line 
                 type="monotone" 
