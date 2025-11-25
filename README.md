@@ -74,13 +74,13 @@ speakinsights-prototype/
 
 ## 🔄 How It Works
 
-1. **User Query**: User types a natural language question
-2. **Schema Context**: System retrieves database schema
-3. **SQL Generation**: LLM converts natural language to SQL
-4. **Query Execution**: SQL is executed against user's database
-5. **Data Analysis**: Results are analyzed for structure and statistics
-6. **Visualization**: Optimal chart type is selected automatically
-7. **Insights**: LLM generates textual analysis and recommendations
+1. **User Query**: User types a natural language question.
+2. **Schema Context**: Backend retrieves the dataset schema and basic stats.
+3. **Playbook Selection**: LLM chooses an analysis *playbook* (e.g. overview, correlation) and fills in high-level slots (target, features). It does **not** generate SQL.
+4. **Data Fetch**: Backend runs fixed, safe SQL to fetch the relevant data (e.g. full table or a limited sample).
+5. **Playbook Execution**: Deterministic Python code computes aggregates, correlations, etc. and prepares a visualization specification.
+6. **Visualization**: Frontend renders the specified chart (bar, histogram, correlation matrix, etc.).
+7. **Insights**: LLM generates a narrative over the structured results, in non‑technical language.
 
 ## 📊 Example Queries
 
@@ -104,7 +104,7 @@ See `SETUP.md` for instructions on creating sample datasets.
 ## 🚧 Roadmap
 
 ### Phase 1 (Current) - MVP
-- ✅ Natural language to SQL
+- ✅ Natural language to analysis playbooks
 - ✅ Dynamic visualizations
 - ✅ Textual analysis
 - ✅ SQLite support

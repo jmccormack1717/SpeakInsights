@@ -42,46 +42,23 @@ npm run dev
 
 ## 3. Create Sample Data (1 minute)
 
-**Option A: Upload CSV (Easiest)**
-1. In the UI, click "New Dataset" → name it "sales_data"
-2. Click "Upload CSV" on the dataset card
-3. Upload `backend/data/sample_sales.csv` (or any CSV file)
-4. Done! ✅
+For the current MVP, the backend will automatically import a cleaned example dataset
+if it doesn't find a database for the default user.
 
-**Option B: Use the script**
-```bash
-cd backend
-python scripts/create_sample_data.py
-```
+Place a CSV file named `cleaned_diabetes_dataset.csv` in one of these locations:
 
-**Option C: Manual SQLite**
-```bash
-sqlite3 data/default_user/sales_data.db
-```
+- `backend/cleaned_diabetes_dataset.csv`
+- `cleaned_diabetes_dataset.csv` (project root)
+- `backend/data/cleaned_diabetes_dataset.csv`
 
-Then run:
-```sql
-CREATE TABLE sales (
-    id INTEGER PRIMARY KEY,
-    region TEXT,
-    product TEXT,
-    amount REAL,
-    quarter TEXT,
-    date DATE
-);
-
-INSERT INTO sales VALUES
-    (1, 'North', 'Product A', 50000, 'Q4', '2024-10-01'),
-    (2, 'South', 'Product A', 45000, 'Q4', '2024-10-15'),
-    (3, 'East', 'Product B', 60000, 'Q4', '2024-11-01'),
-    (4, 'West', 'Product B', 55000, 'Q4', '2024-11-15');
-```
+Then start the backend. On first run, it will create `data/default_user/mvp_dataset.db`
+and import the CSV into it.
 
 ## 4. Try It Out!
 
 1. Open `http://localhost:5173`
 2. Create or select a dataset
-3. Ask a question: **"Show me sales by region"**
+3. Ask a question, e.g.: **"Describe the dataset"** or **"Which features are most related to the outcome?"**
 4. See the magic! 🎉
 
 ## Example Queries

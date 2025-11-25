@@ -38,205 +38,117 @@ class QueryResponse(BaseModel):
 @router.post("/query", response_model=QueryResponse)
 async def execute_query(request: QueryRequest):
     """
-    Execute a natural language query
-    
+    Execute a natural language query using analysis playbooks.
+
     Flow:
     1. Get schema context
-    2. Generate SQL from natural language
-    3. Execute SQL query
-    4. Analyze data structure
-    5. Select visualization
-    6. Generate textual analysis
+    2. Use LLM to choose an analysis playbook (no SQL generation)
+    3. Execute fixed SQL to fetch data
+    4. Run the playbook to produce visualization + context
+    5. Generate textual analysis
     """
     import traceback
     import logging
-    
+
     logger = logging.getLogger(__name__)
-    
+
     try:
         # Step 1: Get schema
         try:
             schema_info = await db_manager.get_schema(
                 request.user_id,
-                request.dataset_id
+                request.dataset_id,
             )
         except Exception as e:
             logger.error(f"Failed to get schema: {str(e)}")
             logger.error(traceback.format_exc())
             raise HTTPException(
                 status_code=404,
-                detail=f"Dataset '{request.dataset_id}' not found. Error: {str(e)}"
+                detail=f"Dataset '{request.dataset_id}' not found. Error: {str(e)}",
             )
-        
-        if not schema_info.get("tables"):
+
+        tables = schema_info.get("tables", [])
+        if not tables:
             raise HTTPException(
                 status_code=404,
-                detail=f"Dataset '{request.dataset_id}' not found or has no tables"
+                detail=f"Dataset '{request.dataset_id}' not found or has no tables",
             )
-        
-        # Step 2: Generate SQL
+
+        main_table = tables[0]["name"]
+
+        # Step 2: Use LLM to select analysis playbook (no SQL)
         try:
-            sql_result = await query_service.generate_sql(
-                request.query,
-                schema_info
+            analysis_request = await query_service.select_analysis(
+                request.query, schema_info
             )
-            sql = sql_result["sql"]
-            intent = sql_result["intent"]
         except Exception as e:
-            logger.error(f"Failed to generate SQL: {str(e)}")
+            logger.error(f"Failed to select analysis: {str(e)}")
             logger.error(traceback.format_exc())
             raise HTTPException(
                 status_code=500,
-                detail=f"Failed to generate SQL query: {str(e)}"
+                detail=f"Failed to plan analysis: {str(e)}",
             )
-        
-        # Step 3: Execute query
+
+        playbook_name = analysis_request.get("playbook", "overview")
+        target = analysis_request.get("target")
+        mode = analysis_request.get("mode", "quick")
+
+        # Step 3: Execute fixed SQL (no LLM-generated SQL)
+        if playbook_name == "overview":
+            sql = f"SELECT * FROM {main_table} LIMIT 500"
+        else:
+            sql = f"SELECT * FROM {main_table}"
+
         try:
             results = await db_manager.execute_query(
                 request.user_id,
                 request.dataset_id,
-                sql
+                sql,
             )
         except Exception as e:
             logger.error(f"Failed to execute query: {str(e)}")
             logger.error(f"SQL that failed: {sql}")
             logger.error(traceback.format_exc())
-            
-            # Provide detailed error message to help user understand what went wrong
-            error_detail = str(e)
-            if "syntax error" in error_detail.lower():
-                error_detail += f" The generated SQL was: {sql}"
-            
             raise HTTPException(
                 status_code=500,
-                detail=f"Failed to execute SQL query: {error_detail}"
+                detail=f"Failed to execute data fetch: {str(e)}",
             )
-        
-        # Step 4: Analyze data structure
+
+        # Step 4: Analyze data structure (generic)
         try:
             data_structure = data_analysis_service.analyze_structure(results)
         except Exception as e:
             logger.error(f"Failed to analyze data structure: {str(e)}")
             data_structure = {}
 
-        # Step 5: Use playbooks for specific intents (e.g., overview, correlation)
-        primary_intent = (intent or {}).get("primary_intent", "").lower()
-
-        # Default: no playbook used
-        visualization = None
-        textual_analysis = None
+        # Step 5: Run the selected playbook
         df = pd.DataFrame(results)
 
-        # Correlation playbook: top features related to outcome
-        if primary_intent == "correlation":
-            play = playbooks.correlation_playbook(df, outcome="Outcome")
-            visualization = play["visualization"]
-            analysis_context = play.get("analysis_context", {})
-            merged_structure = {**data_structure, **analysis_context}
-
-            try:
-                textual_analysis = await analysis_service.generate_insights(
-                    request.query,
-                    results,
-                    sql,
-                    merged_structure
-                )
-            except Exception as e:
-                logger.error(f"Failed to generate analysis: {str(e)}")
-                textual_analysis = {
-                    "summary": "Analysis of feature relationships completed.",
-                    "key_findings": [],
-                    "patterns": [],
-                    "recommendations": []
-                }
-
-            return QueryResponse(
-                sql=sql,
-                results=results,
-                visualization=visualization,
-                analysis=textual_analysis,
-                data_structure=merged_structure
-            )
-
-        # Overview / describe-dataset playbook
-        if primary_intent == "overview":
+        if playbook_name == "correlation":
+            outcome_col = target or "Outcome"
+            play = playbooks.correlation_playbook(df, outcome=outcome_col)
+        else:  # default to overview
             play = playbooks.overview_playbook(df)
-            visualization = play["visualization"]
 
-            # Merge extra context into data_structure for richer analysis
-            analysis_context = play.get("analysis_context", {})
-            merged_structure = {**data_structure, **analysis_context}
+        visualization = play["visualization"]
+        analysis_context = play.get("analysis_context", {})
+        merged_structure = {**data_structure, **analysis_context}
 
-            try:
-                textual_analysis = await analysis_service.generate_insights(
-                    request.query,
-                    results,
-                    sql,
-                    merged_structure
-                )
-            except Exception as e:
-                logger.error(f"Failed to generate analysis: {str(e)}")
-                textual_analysis = {
-                    "summary": f"Dataset has {merged_structure.get('row_count', len(results))} rows and "
-                               f"{merged_structure.get('column_count', len(results[0]) if results else 0)} columns.",
-                    "key_findings": [],
-                    "patterns": [],
-                    "recommendations": []
-                }
-
-            return QueryResponse(
-                sql=sql,
-                results=results,
-                visualization=visualization,
-                analysis=textual_analysis,
-                data_structure=merged_structure
-            )
-
-        # Step 5 (fallback): Select visualization using generic rules
-        try:
-            chart_config = viz_service.select_chart_type(intent, data_structure)
-            formatted_data = viz_service.format_data_for_chart(results, chart_config)
-
-            visualization = {
-                "type": chart_config.get("type"),
-                "data": formatted_data,
-                "config": chart_config.get("config", {}),
-                "metadata": {
-                    "x_axis": chart_config.get("x_axis"),
-                    "y_axis": chart_config.get("y_axis"),
-                    "labels": chart_config.get("labels"),
-                    "values": chart_config.get("values")
-                }
-            }
-        except Exception as e:
-            logger.error(f"Failed to create visualization: {str(e)}")
-            # Fallback to table visualization
-            visualization = {
-                "type": "table",
-                "data": {
-                    "columns": list(results[0].keys()) if results else [],
-                    "rows": results[:100]
-                },
-                "config": {},
-                "metadata": {}
-            }
-
-        # Step 6: Generate analysis
+        # Step 6: Generate analysis narrative
         try:
             textual_analysis = await analysis_service.generate_insights(
                 request.query,
                 results,
                 sql,
-                data_structure
+                merged_structure,
             )
         except Exception as e:
             logger.error(f"Failed to generate analysis: {str(e)}")
-            # Fallback analysis
             textual_analysis = {
-                "summary": f"Query returned {len(results)} rows.",
+                "summary": f"Analysis completed using playbook '{playbook_name}'.",
                 "key_findings": [],
                 "patterns": [],
-                "recommendations": []
+                "recommendations": [],
             }
 
         return QueryResponse(
@@ -244,18 +156,16 @@ async def execute_query(request: QueryRequest):
             results=results,
             visualization=visualization,
             analysis=textual_analysis,
-            data_structure=data_structure
+            data_structure=merged_structure,
         )
-    
+
     except HTTPException:
         raise
-    except ValueError as e:
-        raise HTTPException(status_code=400, detail=str(e))
     except Exception as e:
         logger.error(f"Unexpected error in query execution: {str(e)}")
         logger.error(traceback.format_exc())
         raise HTTPException(
-            status_code=500, 
-            detail=f"Query execution failed: {str(e)}"
+            status_code=500,
+            detail=f"Query execution failed: {str(e)}",
         )
 
