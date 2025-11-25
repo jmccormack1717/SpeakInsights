@@ -136,7 +136,15 @@ Generate a corrected SQL query:"""
                 response = await self.llm.generate_json(messages, temperature=0.3)
                 
                 sql = response.get("sql", "").strip()
-                intent = response.get("intent", {})
+                intent = response.get("intent", {}) or {}
+
+                # If this is a correlation-style question, override SQL to use the full dataset
+                primary_intent = intent.get("primary_intent", "").lower()
+                if primary_intent == "correlation" and table_names:
+                    # Use the first table from the schema and select all columns/rows.
+                    # Correlation logic will pick the numeric columns it needs.
+                    base_table = table_names[0]
+                    sql = f"SELECT * FROM {base_table}"
                 
                 if not sql:
                     raise ValueError("No SQL generated in response")

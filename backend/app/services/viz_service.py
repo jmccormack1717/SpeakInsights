@@ -236,15 +236,23 @@ class VisualizationService:
             }
 
         elif chart_type == "correlation_matrix":
-            # Build correlation matrix from numeric columns in the results
+            # Build correlation matrix from numeric columns in the full results
             df = pd.DataFrame(results)
             if df.empty:
                 return {"labels": [], "matrix": []}
 
             num_df = df.select_dtypes(include="number")
-            if num_df.shape[1] < 2:
+            # Need at least two numeric columns and more than a few rows to say anything meaningful
+            if num_df.shape[1] < 2 or num_df.shape[0] < 5:
                 return {"labels": list(num_df.columns), "matrix": []}
 
+            # Drop constant columns (zero variance) to avoid meaningless correlations
+            variances = num_df.var(numeric_only=True)
+            informative_cols = variances[variances > 0].index.tolist()
+            if len(informative_cols) < 2:
+                return {"labels": informative_cols, "matrix": []}
+
+            num_df = num_df[informative_cols]
             corr = num_df.corr().fillna(0.0)
             labels = list(corr.columns)
             matrix = corr.values.tolist()
