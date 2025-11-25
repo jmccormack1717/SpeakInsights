@@ -90,7 +90,6 @@ Rules:
         # Heuristic: if correlation was requested but target is missing,
         # try to infer a reasonable default from schema table names / columns.
         if playbook == "correlation" and not target:
-            # Look for obvious outcome/target-like columns
             candidate_names = {"outcome", "target", "label", "y"}
             for table in schema_info.get("tables", []):
                 for col in table.get("columns", []):
@@ -99,4 +98,11 @@ Rules:
                         break
                 if target:
                     break
+
+        # Final, fully validated analysis request
+        return {
+            "playbook": playbook,
+            "target": target,
+            "mode": mode,
+        }
 
