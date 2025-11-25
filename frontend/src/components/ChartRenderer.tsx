@@ -28,72 +28,120 @@ export function ChartRenderer({ config }: { config: VisualizationConfig }) {
     case 'bar':
     case 'horizontal_bar':
       return (
-        <div className="w-full h-96">
-          <h3 className="text-xl font-semibold mb-4">{chartConfig.title || 'Chart'}</h3>
-          <ResponsiveContainer width="100%" height="100%">
-            <BarChart data={chartData} layout={type === 'horizontal_bar' ? 'vertical' : 'horizontal'}>
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis 
-                dataKey={type === 'horizontal_bar' ? 'value' : 'name'} 
-                label={{ value: chartConfig.xLabel, position: 'insideBottom', offset: -5 }}
-              />
-              <YAxis 
-                dataKey={type === 'horizontal_bar' ? 'name' : 'value'}
-                label={{ value: chartConfig.yLabel, angle: -90, position: 'insideLeft' }}
-              />
-              <Tooltip />
-              <Legend />
-              <Bar dataKey="value" fill={COLORS[0]} />
-            </BarChart>
-          </ResponsiveContainer>
+        <div className="w-full">
+          {chartConfig.title && (
+            <h3 className="text-lg font-semibold text-gray-800 mb-6">{chartConfig.title}</h3>
+          )}
+          <div className="h-96">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={chartData} layout={type === 'horizontal_bar' ? 'vertical' : 'horizontal'} margin={{ top: 20, right: 30, left: 20, bottom: 20 }}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" opacity={0.3} />
+                <XAxis 
+                  dataKey={type === 'horizontal_bar' ? 'value' : 'name'} 
+                  label={{ value: chartConfig.xLabel, position: 'insideBottom', offset: -5 }}
+                  stroke="#6b7280"
+                  tick={{ fill: '#6b7280' }}
+                />
+                <YAxis 
+                  dataKey={type === 'horizontal_bar' ? 'name' : 'value'}
+                  label={{ value: chartConfig.yLabel, angle: -90, position: 'insideLeft' }}
+                  stroke="#6b7280"
+                  tick={{ fill: '#6b7280' }}
+                />
+                <Tooltip 
+                  contentStyle={{ 
+                    backgroundColor: 'white', 
+                    border: '1px solid #e5e7eb',
+                    borderRadius: '8px',
+                    boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)'
+                  }}
+                />
+                <Legend wrapperStyle={{ paddingTop: '20px' }} />
+                <Bar dataKey="value" fill={COLORS[0]} radius={[8, 8, 0, 0]} />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
         </div>
       );
 
     case 'line':
       return (
-        <div className="w-full h-96">
-          <h3 className="text-xl font-semibold mb-4">{chartConfig.title || 'Chart'}</h3>
-          <ResponsiveContainer width="100%" height="100%">
-            <LineChart data={chartData}>
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis 
-                dataKey="x" 
-                label={{ value: chartConfig.xLabel, position: 'insideBottom', offset: -5 }}
-              />
-              <YAxis 
-                label={{ value: chartConfig.yLabel, angle: -90, position: 'insideLeft' }}
-              />
-              <Tooltip />
-              <Legend />
-              <Line type="monotone" dataKey="y" stroke={COLORS[0]} strokeWidth={2} />
-            </LineChart>
-          </ResponsiveContainer>
+        <div className="w-full">
+          {chartConfig.title && (
+            <h3 className="text-lg font-semibold text-gray-800 mb-6">{chartConfig.title}</h3>
+          )}
+          <div className="h-96">
+            <ResponsiveContainer width="100%" height="100%">
+              <LineChart data={chartData} margin={{ top: 20, right: 30, left: 20, bottom: 20 }}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" opacity={0.3} />
+                <XAxis 
+                  dataKey="x" 
+                  label={{ value: chartConfig.xLabel, position: 'insideBottom', offset: -5 }}
+                  stroke="#6b7280"
+                  tick={{ fill: '#6b7280' }}
+                />
+                <YAxis 
+                  label={{ value: chartConfig.yLabel, angle: -90, position: 'insideLeft' }}
+                  stroke="#6b7280"
+                  tick={{ fill: '#6b7280' }}
+                />
+                <Tooltip 
+                  contentStyle={{ 
+                    backgroundColor: 'white', 
+                    border: '1px solid #e5e7eb',
+                    borderRadius: '8px',
+                    boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)'
+                  }}
+                />
+                <Legend wrapperStyle={{ paddingTop: '20px' }} />
+                <Line 
+                  type="monotone" 
+                  dataKey="y" 
+                  stroke={COLORS[0]} 
+                  strokeWidth={3}
+                  dot={{ fill: COLORS[0], r: 4 }}
+                  activeDot={{ r: 6 }}
+                />
+              </LineChart>
+            </ResponsiveContainer>
+          </div>
         </div>
       );
 
     case 'pie':
       return (
-        <div className="w-full h-96">
-          <h3 className="text-xl font-semibold mb-4">{chartConfig.title || 'Chart'}</h3>
-          <ResponsiveContainer width="100%" height="100%">
-            <PieChart>
-              <Pie
-                data={chartData}
-                cx="50%"
-                cy="50%"
-                labelLine={false}
-                label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
-                outerRadius={120}
-                fill="#8884d8"
-                dataKey="value"
-              >
-                {chartData.map((_, index: number) => (
-                  <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                ))}
-              </Pie>
-              <Tooltip />
-            </PieChart>
-          </ResponsiveContainer>
+        <div className="w-full">
+          {chartConfig.title && (
+            <h3 className="text-lg font-semibold text-gray-800 mb-6 text-center">{chartConfig.title}</h3>
+          )}
+          <div className="h-96">
+            <ResponsiveContainer width="100%" height="100%">
+              <PieChart>
+                <Pie
+                  data={chartData}
+                  cx="50%"
+                  cy="50%"
+                  labelLine={false}
+                  label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
+                  outerRadius={100}
+                  fill="#8884d8"
+                  dataKey="value"
+                >
+                  {chartData.map((_, index: number) => (
+                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                  ))}
+                </Pie>
+                <Tooltip 
+                  contentStyle={{ 
+                    backgroundColor: 'white', 
+                    border: '1px solid #e5e7eb',
+                    borderRadius: '8px',
+                    boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)'
+                  }}
+                />
+              </PieChart>
+            </ResponsiveContainer>
+          </div>
         </div>
       );
 
@@ -128,23 +176,25 @@ export function ChartRenderer({ config }: { config: VisualizationConfig }) {
     case 'table':
       return (
         <div className="w-full">
-          <h3 className="text-xl font-semibold mb-4">{chartConfig.title || 'Data Table'}</h3>
-          <div className="overflow-x-auto">
-            <table className="min-w-full border-collapse border border-gray-300">
-              <thead>
-                <tr className="bg-gray-100">
+          {chartConfig.title && (
+            <h3 className="text-lg font-semibold text-gray-800 mb-4">{chartConfig.title}</h3>
+          )}
+          <div className="overflow-x-auto rounded-lg border border-gray-200">
+            <table className="min-w-full divide-y divide-gray-200">
+              <thead className="bg-gray-50">
+                <tr>
                   {data.columns?.map((col) => (
-                    <th key={col} className="border border-gray-300 px-4 py-2 text-left">
+                    <th key={col} className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
                       {col}
                     </th>
                   ))}
                 </tr>
               </thead>
-              <tbody>
+              <tbody className="bg-white divide-y divide-gray-200">
                 {data.rows?.slice(0, 100).map((row, idx) => (
-                  <tr key={idx} className="hover:bg-gray-50">
+                  <tr key={idx} className="hover:bg-gray-50 transition-colors">
                     {data.columns?.map((col) => (
-                      <td key={col} className="border border-gray-300 px-4 py-2">
+                      <td key={col} className="px-4 py-3 text-sm text-gray-900 whitespace-nowrap">
                         {row[col]?.toString() || ''}
                       </td>
                     ))}
@@ -153,9 +203,9 @@ export function ChartRenderer({ config }: { config: VisualizationConfig }) {
               </tbody>
             </table>
             {data.rows && data.rows.length > 100 && (
-              <p className="mt-2 text-sm text-gray-500">
+              <div className="bg-gray-50 px-4 py-3 text-sm text-gray-500 text-center border-t border-gray-200">
                 Showing first 100 of {data.rows.length} rows
-              </p>
+              </div>
             )}
           </div>
         </div>

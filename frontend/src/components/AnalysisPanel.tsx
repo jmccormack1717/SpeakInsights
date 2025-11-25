@@ -1,35 +1,39 @@
 /** Panel displaying textual analysis and insights */
 import type { TextualAnalysis } from '../types';
-import { Lightbulb, TrendingUp, AlertCircle } from 'lucide-react';
+import { Lightbulb, TrendingUp, AlertCircle, Sparkles } from 'lucide-react';
 
 export function AnalysisPanel({ analysis }: { analysis: TextualAnalysis }) {
   return (
-    <div className="bg-white border border-gray-200 rounded-lg p-6 space-y-6">
-      <h2 className="text-2xl font-bold flex items-center gap-2">
-        <Lightbulb className="w-6 h-6 text-yellow-500" />
-        Analysis & Insights
-      </h2>
+    <div className="bg-white rounded-xl shadow-sm border border-gray-200/60 p-6 sm:p-8 space-y-6">
+      <div className="flex items-center gap-3 pb-4 border-b border-gray-100">
+        <div className="w-10 h-10 bg-gradient-to-br from-amber-400 to-orange-500 rounded-lg flex items-center justify-center shadow-sm">
+          <Sparkles className="w-5 h-5 text-white" />
+        </div>
+        <h2 className="text-xl font-bold text-gray-900">AI Analysis & Insights</h2>
+      </div>
 
       {/* Executive Summary */}
       {analysis.summary && (
-        <div>
-          <h3 className="text-lg font-semibold mb-2">Summary</h3>
-          <p className="text-gray-700 leading-relaxed">{analysis.summary}</p>
+        <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg p-5 border-l-4 border-indigo-500">
+          <h3 className="text-sm font-semibold text-indigo-900 mb-2 uppercase tracking-wide">Executive Summary</h3>
+          <p className="text-gray-800 leading-relaxed">{analysis.summary}</p>
         </div>
       )}
 
       {/* Key Findings */}
       {analysis.key_findings && analysis.key_findings.length > 0 && (
         <div>
-          <h3 className="text-lg font-semibold mb-3 flex items-center gap-2">
-            <TrendingUp className="w-5 h-5 text-blue-500" />
+          <h3 className="text-base font-semibold mb-3 flex items-center gap-2 text-gray-800">
+            <TrendingUp className="w-5 h-5 text-blue-600" />
             Key Findings
           </h3>
-          <ul className="space-y-2">
+          <ul className="space-y-2.5">
             {analysis.key_findings.map((finding, idx) => (
-              <li key={idx} className="flex items-start gap-2">
-                <span className="text-blue-500 mt-1">•</span>
-                <span className="text-gray-700">{finding}</span>
+              <li key={idx} className="flex items-start gap-3">
+                <div className="flex-shrink-0 w-6 h-6 bg-blue-100 rounded-full flex items-center justify-center mt-0.5">
+                  <span className="text-blue-600 text-xs font-semibold">{idx + 1}</span>
+                </div>
+                <span className="text-gray-700 leading-relaxed">{finding}</span>
               </li>
             ))}
           </ul>
@@ -39,12 +43,15 @@ export function AnalysisPanel({ analysis }: { analysis: TextualAnalysis }) {
       {/* Patterns */}
       {analysis.patterns && analysis.patterns.length > 0 && (
         <div>
-          <h3 className="text-lg font-semibold mb-3">Notable Patterns</h3>
-          <ul className="space-y-2">
+          <h3 className="text-base font-semibold mb-3 flex items-center gap-2 text-gray-800">
+            <Lightbulb className="w-5 h-5 text-amber-500" />
+            Notable Patterns
+          </h3>
+          <ul className="space-y-2.5">
             {analysis.patterns.map((pattern, idx) => (
-              <li key={idx} className="flex items-start gap-2">
-                <span className="text-purple-500 mt-1">•</span>
-                <span className="text-gray-700">{pattern}</span>
+              <li key={idx} className="flex items-start gap-3">
+                <div className="flex-shrink-0 w-2 h-2 bg-purple-500 rounded-full mt-2"></div>
+                <span className="text-gray-700 leading-relaxed">{pattern}</span>
               </li>
             ))}
           </ul>
@@ -53,16 +60,16 @@ export function AnalysisPanel({ analysis }: { analysis: TextualAnalysis }) {
 
       {/* Recommendations */}
       {analysis.recommendations && analysis.recommendations.length > 0 && (
-        <div>
-          <h3 className="text-lg font-semibold mb-3 flex items-center gap-2">
-            <AlertCircle className="w-5 h-5 text-green-500" />
+        <div className="bg-green-50 rounded-lg p-5 border border-green-200">
+          <h3 className="text-base font-semibold mb-3 flex items-center gap-2 text-green-900">
+            <AlertCircle className="w-5 h-5 text-green-600" />
             Recommendations
           </h3>
-          <ul className="space-y-2">
+          <ul className="space-y-2.5">
             {analysis.recommendations.map((rec, idx) => (
-              <li key={idx} className="flex items-start gap-2">
-                <span className="text-green-500 mt-1">•</span>
-                <span className="text-gray-700">{rec}</span>
+              <li key={idx} className="flex items-start gap-3">
+                <div className="flex-shrink-0 w-2 h-2 bg-green-600 rounded-full mt-2"></div>
+                <span className="text-green-900 leading-relaxed">{rec}</span>
               </li>
             ))}
           </ul>

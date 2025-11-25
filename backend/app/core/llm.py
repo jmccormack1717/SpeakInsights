@@ -33,8 +33,12 @@ class LLMClient:
             kwargs = {
                 "model": self.model,
                 "messages": messages,
-                "temperature": temperature,
             }
+            
+            # Some models (like gpt-5-nano) only support default temperature (1)
+            # Check if model name contains 'nano' and skip temperature parameter
+            if 'nano' not in self.model.lower():
+                kwargs["temperature"] = temperature
             
             if response_format:
                 kwargs["response_format"] = response_format

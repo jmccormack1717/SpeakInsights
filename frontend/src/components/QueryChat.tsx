@@ -45,34 +45,39 @@ export function QueryChat() {
   };
 
   return (
-    <div className="w-full max-w-4xl mx-auto">
-      <form onSubmit={handleSubmit} className="flex gap-2">
-        <input
-          type="text"
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-          placeholder={
-            currentDatasetId
-              ? "Ask a question about your data..."
-              : "Please select a dataset first"
-          }
-          disabled={isLoading || !currentDatasetId}
-          className="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
-        />
+    <div className="w-full">
+      <div className="mb-3">
+        <label className="text-sm font-medium text-gray-700">Ask a Question</label>
+      </div>
+      <form onSubmit={handleSubmit} className="flex flex-col sm:flex-row gap-3">
+        <div className="flex-1 relative">
+          <input
+            type="text"
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder={
+              currentDatasetId
+                ? "e.g., What's the average glucose level? Show me the distribution of outcomes..."
+                : "Please select a dataset first"
+            }
+            disabled={isLoading || !currentDatasetId}
+            className="w-full px-5 py-4 pr-12 bg-white border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent disabled:bg-gray-50 disabled:cursor-not-allowed text-gray-900 placeholder:text-gray-400 shadow-sm transition-all"
+          />
+        </div>
         <button
           type="submit"
           disabled={isLoading || !query.trim() || !currentDatasetId}
-          className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed flex items-center gap-2"
+          className="px-6 py-4 bg-gradient-to-r from-indigo-600 to-blue-600 text-white rounded-xl hover:from-indigo-700 hover:to-blue-700 disabled:from-gray-400 disabled:to-gray-400 disabled:cursor-not-allowed flex items-center justify-center gap-2 font-medium shadow-md hover:shadow-lg transition-all min-w-[120px]"
         >
           {isLoading ? (
             <>
               <Loader2 className="w-5 h-5 animate-spin" />
-              Processing...
+              <span className="hidden sm:inline">Processing</span>
             </>
           ) : (
             <>
               <Send className="w-5 h-5" />
-              Query
+              <span>Query</span>
             </>
           )}
         </button>
