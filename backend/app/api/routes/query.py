@@ -31,6 +31,7 @@ class QueryResponse(BaseModel):
     sql: str
     results: List[Dict[str, Any]]
     visualization: Dict[str, Any]
+    extra_visualizations: Optional[List[Dict[str, Any]]] = None
     analysis: Dict[str, Any]
     data_structure: Dict[str, Any]
 
@@ -103,6 +104,9 @@ async def execute_query(request: QueryRequest):
         segment_column = analysis_request.get("segment_column")
         top_n = analysis_request.get("top_n")
         bins = analysis_request.get("bins")
+        filter_segment = analysis_request.get("filter_segment")
+        focus_range = analysis_request.get("focus_range")
+        secondary_playbooks = analysis_request.get("secondary_playbooks") or []
         mode = analysis_request.get("mode", "quick")
 
         # Step 3: Execute fixed SQL (no LLM-generated SQL)
@@ -133,8 +137,32 @@ async def execute_query(request: QueryRequest):
             logger.error(f"Failed to analyze data structure: {str(e)}")
             data_structure = {}
 
-        # Step 5: Run the selected playbook
+        # Step 5: Build DataFrame and apply any filters from the planner
         df = pd.DataFrame(results)
+
+        # Apply segment filter if provided (equality filter only for now)
+        if isinstance(filter_segment, dict):
+            col = filter_segment.get("column")
+            value = filter_segment.get("value")
+            if col in df.columns:
+                try:
+                    df = df[df[col] == value]
+                except Exception:
+                    # If filtering fails, keep original df
+                    pass
+
+        # Apply focus range for a numeric feature if provided
+        if isinstance(focus_range, dict):
+            fr_feature = focus_range.get("feature")
+            fr_min = focus_range.get("min")
+            fr_max = focus_range.get("max")
+            if fr_feature in df.columns and isinstance(fr_min, (int, float)) and isinstance(fr_max, (int, float)):
+                try:
+                    series = pd.to_numeric(df[fr_feature], errors="coerce")
+                    mask = series.between(fr_min, fr_max)
+                    df = df[mask]
+                except Exception:
+                    pass
 
         if playbook_name == "correlation":
             outcome_col = target or "Outcome"
@@ -174,7 +202,50 @@ async def execute_query(request: QueryRequest):
         analysis_context = play.get("analysis_context", {})
         merged_structure = {**data_structure, **analysis_context}
 
-        # Step 6: Generate analysis narrative
+        # Step 6: Optionally run secondary playbooks requested by the planner
+        extra_visualizations: List[Dict[str, Any]] = []
+        for secondary in secondary_playbooks:
+            try:
+                if secondary == "correlation":
+                    outcome_col = target or "Outcome"
+                    secondary_play = playbooks.correlation_playbook(
+                        df,
+                        outcome=outcome_col,
+                        top_n=top_n or 5,
+                    )
+                elif secondary == "distribution":
+                    secondary_play = playbooks.distribution_playbook(
+                        df,
+                        feature=feature,
+                        bins=bins or 10,
+                    )
+                elif secondary == "segment_comparison":
+                    secondary_play = playbooks.segment_comparison_playbook(
+                        df,
+                        segment_column=segment_column,
+                        outcome=target,
+                    )
+                elif secondary == "outcome_breakdown":
+                    outcome_col = target or "Outcome"
+                    secondary_play = playbooks.outcome_breakdown_playbook(df, outcome=outcome_col)
+                elif secondary == "feature_outcome_profile":
+                    outcome_col = target or "Outcome"
+                    secondary_play = playbooks.feature_outcome_profile_playbook(
+                        df,
+                        feature=feature,
+                        outcome=outcome_col,
+                        bins=bins or 8,
+                    )
+                else:
+                    continue
+
+                viz = secondary_play.get("visualization")
+                if isinstance(viz, dict):
+                    extra_visualizations.append(viz)
+            except Exception as e:
+                logger.error(f"Secondary playbook '{secondary}' failed: {str(e)}")
+
+        # Step 7: Generate analysis narrative
         try:
             textual_analysis = await analysis_service.generate_insights(
                 request.query,
@@ -195,6 +266,7 @@ async def execute_query(request: QueryRequest):
             sql=sql,
             results=results,
             visualization=visualization,
+            extra_visualizations=extra_visualizations or None,
             analysis=textual_analysis,
             data_structure=merged_structure,
         )

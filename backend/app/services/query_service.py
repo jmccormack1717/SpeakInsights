@@ -38,6 +38,12 @@ Available playbooks:
 You can also set numeric detail parameters when relevant:
 - "top_n": how many top items to show (e.g. top 10 correlated features).
 - "bins": how many bins to use for histograms / profiles (e.g. 20 bins).
+
+You may optionally request SECONDARY playbooks when they clearly add value.
+Examples:
+- For "correlation" you might also request "feature_outcome_profile" for the most important feature.
+- For "outcome_breakdown" you might also request "distribution" for a key feature by outcome.
+Never add secondary playbooks just to show more charts; only add them if they help answer the question.
 """
 
         prompt = f"""You are an analysis planner. Your job is to choose ONE analysis playbook
@@ -58,6 +64,9 @@ Return a JSON object ONLY, with this structure:
   "segment_column": "column_name or null",      // for segment_comparison (categorical/boolean)
   "top_n": number or null,                      // for correlation or any ranking-style output
   "bins": number or null,                       // for distribution / feature_outcome_profile
+  "filter_segment": {{ "column": string, "value": string | number | boolean }} | null,
+  "focus_range": {{ "feature": string, "min": number, "max": number }} | null,
+  "secondary_playbooks": string[] | null,       // names of additional playbooks to run, or null
   "mode": "quick" | "deep"
 }}
 
@@ -70,6 +79,9 @@ Rules:
 - Use "feature_outcome_profile" when the user asks how the outcome changes as a feature increases/decreases (e.g. outcome vs glucose levels).
 - When the user mentions a specific count like "top 3" or "top 10", set "top_n" accordingly (within 3-20).
 - When the user asks for more or fewer "buckets" / "ranges" / "granularity", adjust "bins" between 5 and 30.
+ - Use "filter_segment" when the user restricts analysis to a group (e.g. only Outcome=1, or only Age > 60).
+ - Use "focus_range" when the user specifies a value range of interest for a numeric feature (e.g. glucose between 80 and 200).
+- Only set "secondary_playbooks" when clearly useful; otherwise omit or set it to null.
 - For "correlation", choose a numeric column that looks like the outcome/target (e.g., a binary label) if possible.
 - Default mode is "quick" unless the user clearly asks for very detailed or deep analysis.
 - If you are unsure of a column to use for a given playbook, set its field to null and let the backend fall back safely.
@@ -103,6 +115,9 @@ Rules:
         segment_column = response.get("segment_column")
         top_n = response.get("top_n")
         bins = response.get("bins")
+        filter_segment = response.get("filter_segment")
+        focus_range = response.get("focus_range")
+        secondary_playbooks = response.get("secondary_playbooks") or []
         mode = response.get("mode", "quick")
 
         # Basic validation and fallbacks
@@ -142,6 +157,15 @@ Rules:
         else:
             bins = None
 
+        # Normalize secondary_playbooks to a list of allowed names
+        if not isinstance(secondary_playbooks, list):
+            secondary_playbooks = []
+        secondary_playbooks = [
+            p
+            for p in secondary_playbooks
+            if isinstance(p, str) and p in allowed_playbooks and p != playbook
+        ]
+
         # Final, fully validated analysis request
         return {
             "playbook": playbook,
@@ -150,6 +174,9 @@ Rules:
             "segment_column": segment_column,
             "top_n": top_n,
             "bins": bins,
+            "filter_segment": filter_segment,
+            "focus_range": focus_range,
+            "secondary_playbooks": secondary_playbooks,
             "mode": mode,
         }
 

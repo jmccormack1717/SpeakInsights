@@ -10,6 +10,7 @@ export interface QueryResponse {
   sql: string;
   results: Record<string, any>[];
   visualization: VisualizationConfig;
+  extra_visualizations?: VisualizationConfig[];
   analysis: TextualAnalysis;
   data_structure: DataStructure;
 }

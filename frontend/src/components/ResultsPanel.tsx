@@ -40,12 +40,27 @@ export function ResultsPanel() {
     );
   }
 
+  const secondaryCharts = currentResponse.extra_visualizations || [];
+
   return (
     <div className="w-full mt-6 space-y-5">
       {/* Visualization - Prominent */}
       <div className="bg-si-elevated rounded-2xl shadow-si-soft border border-si-border/70 p-6 sm:p-8">
         <ChartRenderer config={currentResponse.visualization} />
       </div>
+
+      {secondaryCharts.length > 0 && (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {secondaryCharts.map((viz, idx) => (
+            <div
+              key={idx}
+              className="bg-si-surface rounded-2xl shadow-sm border border-si-border/60 p-4"
+            >
+              <ChartRenderer config={viz} />
+            </div>
+          ))}
+        </div>
+      )}
 
       {/* Textual Analysis */}
       <AnalysisPanel analysis={currentResponse.analysis} />
