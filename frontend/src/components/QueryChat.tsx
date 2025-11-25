@@ -6,7 +6,7 @@ import { queryApi } from '../services/api';
 import type { QueryRequest } from '../types';
 
 export function QueryChat() {
-  const [query, setQuery] = useState('');
+  const [question, setQuestion] = useState('');
   const { 
     isLoading, 
     setLoading, 
@@ -19,8 +19,8 @@ export function QueryChat() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!query.trim() || !currentDatasetId) {
-      setError('Please enter a query and select a dataset');
+    if (!question.trim() || !currentDatasetId) {
+      setError('Please enter a question and select a dataset');
       return;
     }
 
@@ -31,14 +31,16 @@ export function QueryChat() {
       const request: QueryRequest = {
         user_id: currentUserId,
         dataset_id: currentDatasetId,
-        query: query.trim(),
+        query: question.trim(),
       };
 
       const response = await queryApi.executeQuery(request);
       setResponse(response);
-      setQuery(''); // Clear input after successful query
+      setQuestion(''); // Clear input after successful analysis
     } catch (error: any) {
-      setError(error.response?.data?.detail || error.message || 'Query failed');
+      // Log full error to console for debugging, but show a friendly message to the user
+      console.error('Analysis error:', error);
+      setError('We couldn\'t analyze your data just now. Please try a slightly different question.');
     } finally {
       setLoading(false);
     }
@@ -47,14 +49,14 @@ export function QueryChat() {
   return (
     <div className="w-full">
       <div className="mb-3">
-        <label className="text-sm font-medium text-gray-700">Ask a Question</label>
+        <label className="text-sm font-medium text-gray-700">Ask about your data</label>
       </div>
       <form onSubmit={handleSubmit} className="flex flex-col sm:flex-row gap-3">
         <div className="flex-1 relative">
           <input
             type="text"
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
+            value={question}
+            onChange={(e) => setQuestion(e.target.value)}
             placeholder={
               currentDatasetId
                 ? "e.g., What's the average glucose level? Show me the distribution of outcomes..."
@@ -66,7 +68,7 @@ export function QueryChat() {
         </div>
         <button
           type="submit"
-          disabled={isLoading || !query.trim() || !currentDatasetId}
+          disabled={isLoading || !question.trim() || !currentDatasetId}
           className="px-6 py-4 bg-gradient-to-r from-indigo-600 to-blue-600 text-white rounded-xl hover:from-indigo-700 hover:to-blue-700 disabled:from-gray-400 disabled:to-gray-400 disabled:cursor-not-allowed flex items-center justify-center gap-2 font-medium shadow-md hover:shadow-lg transition-all min-w-[120px]"
         >
           {isLoading ? (
@@ -77,7 +79,7 @@ export function QueryChat() {
           ) : (
             <>
               <Send className="w-5 h-5" />
-              <span>Query</span>
+              <span>Analyze</span>
             </>
           )}
         </button>

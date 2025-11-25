@@ -31,21 +31,27 @@ class AnalysisService:
         # Prepare results summary for LLM
         results_summary = self._prepare_results_summary(query_results, data_structure)
         
-        prompt = f"""Analyze these query results and provide insights:
+        prompt = f"""You are helping a non-technical business user understand their data.
+The user will never see any mention of SQL, queries, or technical implementation details.
+Speak in clear, friendly business language.
 
-User Query: "{user_query}"
-SQL Query: {sql}
+User Question: "{user_query}"
 
-Query Results Summary:
+Data Summary:
 {results_summary}
 
-Provide a comprehensive analysis with:
+Please provide a concise, easy-to-understand analysis with:
 1. Executive summary (2-3 sentences describing the key findings)
 2. Key findings (3-5 bullet points highlighting important patterns or numbers)
 3. Notable patterns or anomalies (if any)
 4. Recommendations (if applicable, 1-2 actionable insights)
 
-Return JSON format:
+Formatting rules:
+- Do NOT mention SQL, queries, tables, columns, or code.
+- When you mention numbers, round them to at most 2 decimal places.
+- Prefer percentages and simple ranges over raw long decimals.
+
+Return JSON format only:
 {{
   "summary": "Executive summary text",
   "key_findings": ["finding 1", "finding 2", ...],
