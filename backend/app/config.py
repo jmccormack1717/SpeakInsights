@@ -22,7 +22,7 @@ class Settings(BaseSettings):
     api_port: int = 8000
     
     # CORS Configuration - handle comma-separated string from env
-    cors_origins: Union[str, List[str]] = "http://localhost:5173,http://localhost:3000"
+    cors_origins: Union[str, List[str]] = "http://localhost:5173,http://localhost:3000,https://speakinsights-prototype.onrender.com"
     
     @field_validator('cors_origins', mode='before')
     @classmethod
@@ -31,10 +31,22 @@ class Settings(BaseSettings):
         if isinstance(v, str):
             # Split by comma and strip whitespace
             origins = [origin.strip() for origin in v.split(",") if origin.strip()]
-            return origins if origins else ["http://localhost:5173"]
+            # Default origins if empty
+            if not origins:
+                origins = [
+                    "http://localhost:5173",
+                    "http://localhost:3000",
+                    "https://speakinsights-prototype.onrender.com"
+                ]
+            return origins
         if isinstance(v, list):
             return v
-        return ["http://localhost:5173"]
+        # Default fallback
+        return [
+            "http://localhost:5173",
+            "http://localhost:3000",
+            "https://speakinsights-prototype.onrender.com"
+        ]
     
     class Config:
         env_file = ".env"

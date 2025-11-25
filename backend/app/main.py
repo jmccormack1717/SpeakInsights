@@ -41,6 +41,9 @@ app.include_router(schema.router, prefix="/api/v1", tags=["schema"])
 @app.on_event("startup")
 async def startup_event():
     """Initialize MVP dataset on startup if it doesn't exist"""
+    # Log CORS configuration
+    logger.info(f"CORS allowed origins: {settings.cors_origins}")
+    
     user_id = "default_user"
     dataset_id = "mvp_dataset"
     db_path = db_manager.get_database_path(user_id, dataset_id)
