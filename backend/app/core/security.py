@@ -49,12 +49,25 @@ class SQLValidator:
         
         # Check for table names if provided
         if allowed_tables:
-            # Extract table names from FROM and JOIN clauses
+            # First, handle PRAGMA table_info() queries - extract table name from function call
+            # Pattern: FROM pragma_table_info('table_name') or FROM pragma_table_info("table_name")
+            pragma_pattern = r'PRAGMA_TABLE_INFO\s*\(\s*[\'"]?(\w+)[\'"]?\s*\)'
+            pragma_matches = re.findall(pragma_pattern, sql_upper, re.IGNORECASE)
+            for pragma_table in pragma_matches:
+                if pragma_table.upper() not in [t.upper() for t in allowed_tables]:
+                    return False, f"PRAGMA table_info() is querying table '{pragma_table}' which is not allowed or does not exist."
+            
+            # Extract regular table names from FROM and JOIN clauses
+            # Exclude PRAGMA functions by checking if FROM is followed by PRAGMA
+            # Pattern matches: FROM table_name (but we'll filter out PRAGMA functions)
             table_pattern = r'\bFROM\s+(\w+)|JOIN\s+(\w+)'
             matches = re.findall(table_pattern, sql_upper)
             found_tables = [m[0] or m[1] for m in matches if m[0] or m[1]]
             
             for table in found_tables:
+                # Skip PRAGMA functions - they're table-valued functions, not actual tables
+                if 'PRAGMA' in table.upper() or table.upper().startswith('PRAGMA_'):
+                    continue
                 if table.upper() not in [t.upper() for t in allowed_tables]:
                     return False, f"Table '{table}' is not allowed or does not exist."
         
