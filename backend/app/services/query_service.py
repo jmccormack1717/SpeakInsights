@@ -11,6 +11,7 @@ class QueryService:
     
     def __init__(self):
         self.llm = LLMClient()
+        self.logger = logging.getLogger(__name__)
     
     async def generate_sql(
         self,
@@ -146,7 +147,7 @@ Generate a corrected SQL query:"""
                 if not is_valid:
                     last_error = error_msg
                     if attempt < max_retries:
-                        logger.warning(f"SQL validation failed (attempt {attempt + 1}/{max_retries + 1}): {error_msg}. Retrying...")
+                        self.logger.warning(f"SQL validation failed (attempt {attempt + 1}/{max_retries + 1}): {error_msg}. Retrying...")
                         continue
                     else:
                         raise ValueError(f"Generated SQL is invalid after {max_retries + 1} attempts: {error_msg}")
@@ -162,7 +163,7 @@ Generate a corrected SQL query:"""
             except Exception as e:
                 last_error = str(e)
                 if attempt < max_retries:
-                    logger.warning(f"SQL generation failed (attempt {attempt + 1}/{max_retries + 1}): {str(e)}. Retrying...")
+                    self.logger.warning(f"SQL generation failed (attempt {attempt + 1}/{max_retries + 1}): {str(e)}. Retrying...")
                     continue
                 else:
                     raise Exception(f"Failed to generate valid SQL after {max_retries + 1} attempts: {str(e)}")
