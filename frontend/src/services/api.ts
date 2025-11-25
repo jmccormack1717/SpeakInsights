@@ -2,7 +2,22 @@
 import axios from 'axios';
 import type { QueryRequest, QueryResponse, Dataset } from '../types';
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api/v1';
+// Ensure API URL ends with /api/v1
+const getApiBaseUrl = () => {
+  const envUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+  // Remove trailing slash if present
+  const baseUrl = envUrl.replace(/\/$/, '');
+  // Add /api/v1 if not already present
+  if (!baseUrl.endsWith('/api/v1')) {
+    return `${baseUrl}/api/v1`;
+  }
+  return baseUrl;
+};
+
+const API_BASE_URL = getApiBaseUrl();
+
+// Log for debugging (remove in production)
+console.log('API Base URL:', API_BASE_URL);
 
 const apiClient = axios.create({
   baseURL: API_BASE_URL,
@@ -10,6 +25,32 @@ const apiClient = axios.create({
     'Content-Type': 'application/json',
   },
 });
+
+// Add request interceptor for debugging
+apiClient.interceptors.request.use(
+  (config) => {
+    console.log(`API Request: ${config.method?.toUpperCase()} ${config.baseURL}${config.url}`);
+    return config;
+  },
+  (error) => {
+    return Promise.reject(error);
+  }
+);
+
+// Add response interceptor for error handling
+apiClient.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    console.error('API Error:', {
+      url: error.config?.url,
+      baseURL: error.config?.baseURL,
+      fullURL: `${error.config?.baseURL}${error.config?.url}`,
+      status: error.response?.status,
+      message: error.message,
+    });
+    return Promise.reject(error);
+  }
+);
 
 export const queryApi = {
   /**
