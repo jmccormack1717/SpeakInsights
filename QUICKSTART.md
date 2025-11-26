@@ -40,33 +40,33 @@ npm run dev
 
 ✅ Frontend running at `http://localhost:5173`
 
-## 3. Create Sample Data (1 minute)
+## 3. Demo Dataset (PIMA Diabetes)
 
-For the current MVP, the backend will automatically import a cleaned example dataset
+For the current demo, the backend will automatically import a **cleaned PIMA diabetes dataset**
 if it doesn't find a database for the default user.
 
-Place a CSV file named `cleaned_diabetes_dataset.csv` in one of these locations:
+Place a CSV file named `cleaned_diabetes_dataset.csv` in one of these locations (if it’s not already there):
 
 - `backend/cleaned_diabetes_dataset.csv`
 - `cleaned_diabetes_dataset.csv` (project root)
 - `backend/data/cleaned_diabetes_dataset.csv`
 
-Then start the backend. On first run, it will create `data/default_user/mvp_dataset.db`
+Then start the backend. On first run, it will create `backend/data/default_user/mvp_dataset.db`
 and import the CSV into it.
 
-## 4. Try It Out!
+## 4. Try It Out! (Built-in + Your Own CSV)
 
 1. Open `http://localhost:5173`
-2. Create or select a dataset
+2. Use the **PIMA diabetes dataset** (default) or upload your own CSV (see Dataset card)
 3. Ask a question, e.g.: **"Describe the dataset"** or **"Which features are most related to the outcome?"**
 4. See the magic! 🎉
 
 ## Example Queries
 
-- "Show me total sales by region"
-- "What are the top products by revenue?"
-- "Compare sales across quarters"
-- "Show me sales trends over time"
+- "Describe this dataset to me."
+- "Which features are most strongly related to the outcome?"
+- "How does glucose relate to the diabetes outcome?"
+- "Show the distribution of BMI."
 
 ## Troubleshooting
 

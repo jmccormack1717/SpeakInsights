@@ -69,62 +69,34 @@
 
    The frontend will be available at `http://localhost:5173`
 
-## Creating Your First Dataset
+## Creating / Using Datasets
 
 1. **Start both backend and frontend servers**
 
-2. **In the frontend:**
-   - Click "New Dataset" to create a dataset
-   - Give it a name (e.g., "sales_data")
+2. **Built-in PIMA diabetes dataset (recommended starting point)**  
+   - On first backend startup, a cleaned diabetes CSV (`cleaned_diabetes_dataset.csv`) is imported into `backend/data/default_user/mvp_dataset.db`.
+   - In the UI, this appears as **“PIMA Diabetes Dataset”** and is selected by default.
 
-3. **Add data to your dataset:**
-   
-   **Option A: Upload CSV (Recommended)**
-   - Click "Upload CSV" button on your dataset card
-   - Select a CSV file from your computer
-   - The system will automatically create a table and import the data
-   - Sample CSV available at: `backend/data/sample_sales.csv`
-   
-   **Option B: Manual SQL (Advanced)**
-   
-   The dataset will be created at: `backend/data/{user_id}/{dataset_id}.db`
-   
-   You can use any SQLite tool to add tables and data:
-   
-   ```bash
-   # Using sqlite3 command line
-   sqlite3 backend/data/default_user/sales_data.db
-   
-   # Create a sample table
-   CREATE TABLE sales (
-       id INTEGER PRIMARY KEY,
-       region TEXT,
-       product TEXT,
-       amount REAL,
-       quarter TEXT,
-       date DATE
-   );
-   
-   # Insert sample data
-   INSERT INTO sales (region, product, amount, quarter, date) VALUES
-       ('North', 'Product A', 50000, 'Q4', '2024-10-01'),
-       ('South', 'Product A', 45000, 'Q4', '2024-10-15'),
-       ('East', 'Product B', 60000, 'Q4', '2024-11-01'),
-       ('West', 'Product B', 55000, 'Q4', '2024-11-15');
-   ```
+3. **Import your own CSV via the UI (no-code)**  
+   - In the **Dataset** section, use the **“Import your own CSV”** card.  
+   - Choose a CSV from your machine; the app will:
+     - Create a new SQLite DB for that dataset: `backend/data/{user_id}/{dataset_id}.db`
+     - Import the CSV into a table and make it available to the playbooks.
+   - On the free Render tier and typical dev machines, CSVs up to roughly **50MB / ~100k rows** tend to perform best for this demo.
 
 4. **Query your data:**
-   - Select your dataset in the frontend
-   - Type a query like: "Show me sales by region for Q4"
-   - See the results with visualization and analysis!
+   - Select the dataset you want (PIMA or your custom CSV).  
+   - Ask questions like:
+     - "Describe this dataset."
+     - "Which features are most related to the outcome?"
+     - "How does glucose relate to the diabetes outcome?"
 
 ## Example Queries
 
-- "Show me total sales by region"
-- "What are the top 5 products by revenue?"
-- "Show me sales trends over time"
-- "Compare sales across different regions"
-- "What is the average sales amount?"
+- "Describe the dataset to me like I’m new to it."
+- "Which features are most strongly correlated with the outcome?"
+- "Show the distribution of BMI."
+- "Compare patients with diabetes vs without across key metrics."
 
 ## Troubleshooting
 

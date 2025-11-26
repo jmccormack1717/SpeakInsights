@@ -1,69 +1,39 @@
-# Hardcoded Dataset Setup for MVP
+# Demo Dataset Setup (PIMA Diabetes)
 
-## Where to Put Your Dataset
+This project ships with a **cleaned PIMA diabetes dataset** as the default demo, and also supports uploading additional CSVs via the UI.
 
-Place your SQLite database file at:
+## Where the Demo Dataset Lives
 
-```
-backend/data/default_user/mvp_dataset.db
-```
+On first backend startup, if no database is found for the default user/dataset, the app will:
 
-## Steps to Add Your Dataset
-
-### Option 1: Create from CSV (Recommended)
-
-1. **Place your CSV file** at: `backend/data/your_data.csv`
-
-2. **Run the import script** (create this script):
-   ```bash
-   cd backend
-   python scripts/import_mvp_dataset.py
-   ```
-
-3. **Or manually import using SQLite:**
-   ```bash
-   sqlite3 data/default_user/mvp_dataset.db
-   ```
-   Then create tables and import your data.
-
-### Option 2: Copy Existing Database
-
-1. **Create the directory** (if it doesn't exist):
-   ```bash
-   mkdir -p backend/data/default_user
-   ```
-
-2. **Copy your database file** to:
+1. Look for a CSV named `cleaned_diabetes_dataset.csv` in any of these locations:
+   - `backend/cleaned_diabetes_dataset.csv`
+   - `cleaned_diabetes_dataset.csv` (project root)
+   - `backend/data/cleaned_diabetes_dataset.csv`
+2. Import it into a SQLite database at:
    ```
    backend/data/default_user/mvp_dataset.db
    ```
 
-### Option 3: Use SQLite GUI Tool
+In the UI this appears as **“PIMA Diabetes Dataset”** and is selected by default.
 
-1. Open `backend/data/default_user/mvp_dataset.db` in DB Browser for SQLite
-2. Import your CSV or create tables manually
-3. Save the database
+## Using Your Own Data Instead (Local Development)
 
-## Important Notes
+You don’t need to pre-create a SQLite database any more—just:
 
-- **File name must be**: `mvp_dataset.db`
-- **Location must be**: `backend/data/default_user/`
-- **User ID**: `default_user` (hardcoded in frontend)
-- **Dataset ID**: `mvp_dataset` (hardcoded in frontend)
+1. Start backend and frontend.
+2. In the app, go to the **Dataset** section.
+3. Use the **“Import your own CSV”** card to upload a file.
+4. The backend will create `backend/data/{user_id}/{dataset_id}.db` and import your CSV automatically.
 
-## After Adding Your Dataset
+For this demo (especially on free Render hosting), datasets up to about **50MB / ~100k rows** are recommended for good responsiveness.
 
-1. The dataset will automatically be selected when the app loads
-2. Users can immediately start querying it
-3. No need to create/upload - it's already there!
+## Notes for Deployment (Render)
 
-## For Deployment
+- The demo SQLite DB for PIMA diabetes will be placed at `backend/data/default_user/mvp_dataset.db` on the server.
+- Render’s filesystem is ephemeral, so for long-lived custom datasets you would normally:
+  - Include small demo DBs in the repo **or**
+  - Recreate/import data on each deploy via a script **or**
+  - Attach a persistent disk (paid feature)
 
-On Render, the database file will be in the same location:
-- `backend/data/default_user/mvp_dataset.db`
-
-**Note**: Render's filesystem is ephemeral, so you'll need to:
-- Either include the database file in your git repo (if small)
-- Or recreate it on each deploy using a script
-- Or use Render Disk for persistence (paid feature)
-
+For portfolio/demo purposes, relying on auto-import of the diabetes CSV and ad‑hoc CSV uploads is usually sufficient.

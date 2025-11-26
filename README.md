@@ -1,22 +1,23 @@
-# SpeakInsights - Prompt-Driven Data Analytics Platform
+# SpeakInsights – Natural-Language Data Analysis for Any CSV
 
-A scalable data analytics platform where users can query their datasets using natural language and get dynamic visualizations and insights.
+SpeakInsights is a personal project and demo app that lets you drop in a CSV file, ask questions in plain English, and get tailored charts and narrative insights. It ships with a cleaned PIMA diabetes dataset and also supports importing your own CSVs.
 
-## 🚀 Features
+## 🚀 What This Project Showcases
 
-- **Natural Language Queries**: Ask questions in plain English
-- **Dynamic Visualizations**: Automatically selects the best chart type
-- **Intelligent Analysis**: AI-powered insights and recommendations
-- **Multi-Dataset Support**: Manage multiple databases per user
-- **Real-time Execution**: Instant query results and visualizations
+- **Natural-language queries**: Ask questions in plain English (no SQL or code).
+- **Playbook-driven analysis**: LLM chooses from a toolbox of analysis playbooks (overview, correlation, distributions, relationships, segment comparisons, etc.) instead of generating raw SQL.
+- **Dynamic visualizations**: Histograms, bar charts, scatter plots, correlation views, and more, picked based on intent + data shape.
+- **Built-in demo dataset**: Cleaned PIMA diabetes dataset auto-loaded for instant testing.
+- **Bring-your-own-data**: Upload a CSV (within demo limits) and analyze it with the same tools.
+- **Narrative insights**: LLM explains the findings like a data analyst talking to a business stakeholder.
 
-## 🏗️ Architecture
+## 🏗️ Architecture (High Level)
 
-- **Backend**: FastAPI (Python) with async support
-- **Frontend**: React + TypeScript + Vite
-- **Database**: SQLite (Phase 1) → PostgreSQL (Phase 2+)
-- **LLM**: OpenAI GPT-4/3.5-turbo
-- **Charts**: Recharts for dynamic visualizations
+- **Backend**: FastAPI (Python, async) + SQLAlchemy + Pandas/Numpy
+- **Frontend**: React + TypeScript + Vite + Tailwind CSS + Recharts
+- **Database**: SQLite per dataset (sufficient for a demo and small/medium CSVs)
+- **LLM**: OpenAI `gpt-5-nano-2025-08-07` (configurable)
+- **Charts**: Recharts implementing a small visualization grammar (bar, histogram, scatter, line, correlation matrix, etc.)
 
 ## 📋 Prerequisites
 
@@ -26,7 +27,7 @@ A scalable data analytics platform where users can query their datasets using na
 
 ## ⚡ Quick Start
 
-See [SETUP.md](./SETUP.md) for detailed setup instructions.
+See [SETUP.md](./SETUP.md) for detailed setup instructions. High level:
 
 ### Backend
 
@@ -50,6 +51,9 @@ npm run dev
 
 Visit `http://localhost:5173` to use the application.
 
+- By default the backend will import a cleaned PIMA diabetes CSV into a SQLite DB for the demo dataset.
+- In the UI you can either use this built-in dataset or upload your own CSV (recommended size: up to ~50MB / ~100k rows on free hosting).
+
 ## 📁 Project Structure
 
 ```
@@ -72,56 +76,38 @@ speakinsights-prototype/
 └── README.md
 ```
 
-## 🔄 How It Works
+## 🔄 How It Works (Playbooks, Not Raw SQL)
 
 1. **User Query**: User types a natural language question.
 2. **Schema Context**: Backend retrieves the dataset schema and basic stats.
-3. **Playbook Selection**: LLM chooses an analysis *playbook* (e.g. overview, correlation) and fills in high-level slots (target, features). It does **not** generate SQL.
-4. **Data Fetch**: Backend runs fixed, safe SQL to fetch the relevant data (e.g. full table or a limited sample).
-5. **Playbook Execution**: Deterministic Python code computes aggregates, correlations, etc. and prepares a visualization specification.
-6. **Visualization**: Frontend renders the specified chart (bar, histogram, correlation matrix, etc.).
+3. **Playbook Selection**: LLM chooses an analysis *playbook* (overview, distribution, correlation, relationship, outcome breakdown, segment comparison, etc.) and fills in high-level slots (target, features, segments). It does **not** generate SQL.
+4. **Data Fetch**: Backend runs fixed, safe SQL (e.g., `SELECT * FROM main_table LIMIT N`) to fetch the relevant slice of data.
+5. **Playbook Execution**: Deterministic Python code computes aggregates, correlations, distributions, etc. and prepares a visualization specification.
+6. **Visualization**: Frontend renders the specified chart (bar, histogram, scatter, correlation matrix, table, etc.).
 7. **Insights**: LLM generates a narrative over the structured results, in non‑technical language.
 
 ## 📊 Example Queries
 
-- "Show me total sales by region"
-- "What are the top 5 products by revenue?"
-- "Compare sales across different quarters"
-- "Show me sales trends over time"
-- "What is the average order value?"
+- "Describe the dataset to me like I’m new to it."
+- "Which features are most related to the outcome?"
+- "How does glucose relate to the diabetes outcome?"
+- "Show the distribution of BMI."
+- "Compare patients with diabetes vs without across key metrics."
+- "What percentage of patients have the disease?"
 
-## 🛠️ Development
+## 🛠️ Development Notes
 
 ### Backend API
 
 - API docs: `http://localhost:8000/docs`
 - Health check: `http://localhost:8000/health`
 
-### Adding Sample Data
+### Sample / Demo Data
 
-See `SETUP.md` for instructions on creating sample datasets.
+- A cleaned PIMA diabetes CSV is auto-imported on first backend startup for the default user/dataset (`default_user` / `mvp_dataset`).
+- You can also upload your own CSVs via the UI; the backend creates a new SQLite DB per dataset and imports the file using Pandas + SQLAlchemy.
 
-## 🚧 Roadmap
-
-### Phase 1 (Current) - MVP
-- ✅ Natural language to analysis playbooks
-- ✅ Dynamic visualizations
-- ✅ Textual analysis
-- ✅ SQLite support
-
-### Phase 2 - Enhancement
-- User authentication
-- Query history
-- More chart types
-- CSV upload
-- PostgreSQL support
-
-### Phase 3 - Scale
-- Query caching
-- Background jobs
-- Advanced analytics
-- Export features
-- Performance optimization
+This project is **not** optimized for large-scale / multi-tenant production use; it intentionally focuses on clarity of architecture and code for portfolio / interview purposes.
 
 ## 📝 License
 
