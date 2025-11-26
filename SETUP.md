@@ -117,5 +117,5 @@
 - Add more datasets
 - Experiment with different query types
 - Customize visualizations
-- Add authentication (Phase 2)
+- Harden authentication & authorization (rate limits, roles, etc.)
 

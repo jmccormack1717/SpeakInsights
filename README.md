@@ -16,7 +16,7 @@ SpeakInsights is a personal project and demo app that lets you drop in a CSV fil
 - **Backend**: FastAPI (Python, async) + SQLAlchemy + Pandas/Numpy
 - **Frontend**: React + TypeScript + Vite + Tailwind CSS + Recharts
 - **Database**: SQLite per dataset (sufficient for a demo and small/medium CSVs)
-- **LLM**: OpenAI `gpt-5-nano-2025-08-07` (configurable)
+- **LLM**: OpenAI model (default: `gpt-4-turbo-preview`, configurable via environment)
 - **Charts**: Recharts implementing a small visualization grammar (bar, histogram, scatter, line, correlation matrix, etc.)
 
 ## 📋 Prerequisites
@@ -68,13 +68,23 @@ speakinsights-prototype/
 │   └── requirements.txt
 ├── frontend/
 │   ├── src/
-│   │   ├── components/  # React components
+│   │   ├── components/   # React components
 │   │   ├── services/     # API client
 │   │   ├── stores/       # State management
 │   │   └── types/        # TypeScript types
 │   └── package.json
 └── README.md
 ```
+
+## ☁️ Deployment
+
+- **Live demo**: [`https://speakinsights-prototype.onrender.com/`](https://speakinsights-prototype.onrender.com/)
+- **Backend**: Render web service (FastAPI + Uvicorn)
+- **Frontend**: Static build served via Render
+- **Key environment variables**:
+  - `OPENAI_API_KEY` – OpenAI API key for LLM calls
+  - `VITE_API_URL` – Frontend → backend base URL (e.g. Render backend URL)
+- **Note on persistence**: User accounts and datasets are stored in SQLite files on the container filesystem; on free Render tiers this storage is ephemeral, so data may reset on redeploys or restarts.
 
 ## 🔄 How It Works (Playbooks, Not Raw SQL)
 
