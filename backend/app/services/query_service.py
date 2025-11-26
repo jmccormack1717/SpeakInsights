@@ -132,10 +132,12 @@ Rules:
         if playbook not in allowed_playbooks:
             playbook = "overview"
 
+        # Common candidate names for "outcome-like" targets
+        candidate_names = {"outcome", "target", "label", "y"}
+
         # Heuristic: if correlation or outcome_breakdown was requested but target is missing,
         # try to infer a reasonable default from schema table names / columns.
         if playbook in {"correlation", "outcome_breakdown"} and not target:
-            candidate_names = {"outcome", "target", "label", "y"}
             for table in schema_info.get("tables", []):
                 for col in table.get("columns", []):
                     if col["name"].lower() in candidate_names:
@@ -143,6 +145,26 @@ Rules:
                         break
                 if target:
                     break
+
+        # Additional heuristic for correlation:
+        # If the user clearly mentions a specific column name (e.g. "Pregnancies") and
+        # target is still empty or points to a generic outcome column, treat that
+        # mentioned column as the correlation target instead.
+        if playbook == "correlation":
+            mentioned_columns = []
+            for table in schema_info.get("tables", []):
+                for col in table.get("columns", []):
+                    col_name = col["name"]
+                    col_lower = col_name.lower()
+                    if col_lower in lower_query:
+                        mentioned_columns.append(col_name)
+
+            # Prefer non-outcome-like columns when the query mentions them
+            non_outcome_mentions = [
+                c for c in mentioned_columns if c.lower() not in candidate_names
+            ]
+            if non_outcome_mentions and (not target or target.lower() in candidate_names):
+                target = non_outcome_mentions[0]
 
         # Clamp numeric detail parameters to reasonable ranges
         if isinstance(top_n, (int, float)):
