@@ -33,6 +33,10 @@ export interface VisualizationConfig {
     sort?: 'ascending' | 'descending' | 'none';
     colors?: string[];
     bins?: number;
+    mark?: 'bar' | 'line' | 'area' | 'point' | 'boxplot';
+    xField?: string;
+    yField?: string;
+    groupField?: string;
   };
   metadata?: {
     x_axis?: string;

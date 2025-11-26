@@ -125,6 +125,9 @@ def correlation_playbook(
             "title": f"Top {len(labels)} features related to {outcome}",
             "xLabel": "Feature",
             "yLabel": f"Correlation with {outcome}",
+            "mark": "bar",
+            "xField": "Feature",
+            "yField": "Correlation",
         },
         "metadata": {
             "correlation_matrix": {
@@ -201,7 +204,7 @@ def distribution_playbook(
     values = [int(c) for c in counts]
 
     visualization = {
-        "type": "bar",  # Use bar chart to represent histogram bins
+        "type": "histogram",  # Use bar chart to represent histogram bins
         "data": {
             "labels": labels,
             "values": values,
@@ -210,6 +213,10 @@ def distribution_playbook(
             "title": f"Distribution of {feature}",
             "xLabel": feature,
             "yLabel": "Count of rows",
+            "mark": "bar",
+            "bins": bins,
+            "xField": feature,
+            "yField": "count",
         },
     }
 
@@ -502,6 +509,9 @@ def feature_outcome_profile_playbook(
             "title": f"Outcome rate by {feature} range",
             "xLabel": f"{feature} range",
             "yLabel": f"Average {outcome}",
+            "mark": "line",
+            "xField": f"{feature}_binned",
+            "yField": f"avg_{outcome}",
         },
     }
 
