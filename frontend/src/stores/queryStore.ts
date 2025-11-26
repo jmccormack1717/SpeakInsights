@@ -67,7 +67,7 @@ export const useQueryStore = create<QueryState>((set) => ({
     })),
   setUserId: (userId) => set({ currentUserId: userId }),
   setDatasetId: (datasetId) =>
-    set((state) => ({
+    set(() => ({
       currentDatasetId: datasetId,
       // Changing dataset starts a fresh conversation
       history: [],
