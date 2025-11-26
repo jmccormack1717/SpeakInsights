@@ -1,6 +1,6 @@
 /** Panel displaying textual analysis and insights */
 import type { TextualAnalysis } from '../types';
-import { Lightbulb, TrendingUp, AlertCircle, Sparkles } from 'lucide-react';
+import { Lightbulb, TrendingUp, AlertCircle, Sparkles, MessageCircleMore } from 'lucide-react';
 
 export function AnalysisPanel({ analysis }: { analysis: TextualAnalysis }) {
   return (
@@ -70,6 +70,26 @@ export function AnalysisPanel({ analysis }: { analysis: TextualAnalysis }) {
               <li key={idx} className="flex items-start gap-3">
                 <div className="flex-shrink-0 w-2 h-2 bg-green-600 rounded-full mt-2"></div>
                 <span className="text-green-900 leading-relaxed">{rec}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+
+      {/* Follow-up questions */}
+      {analysis.follow_ups && analysis.follow_ups.length > 0 && (
+        <div className="pt-4 border-t border-gray-100">
+          <h3 className="text-sm font-semibold mb-2 flex items-center gap-2 text-gray-800">
+            <MessageCircleMore className="w-4 h-4 text-si-primary" />
+            Helpful follow-up questions
+          </h3>
+          <ul className="flex flex-wrap gap-2">
+            {analysis.follow_ups.map((q, idx) => (
+              <li
+                key={idx}
+                className="px-3 py-1.5 text-xs rounded-full bg-si-primary-soft text-si-primary-strong border border-si-primary/20"
+              >
+                {q}
               </li>
             ))}
           </ul>

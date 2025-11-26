@@ -4,6 +4,7 @@ import { Moon, Sun } from 'lucide-react';
 import { QueryChat } from './components/QueryChat';
 import { ResultsPanel } from './components/ResultsPanel';
 import { DatasetSelector } from './components/DatasetSelector';
+import { PlaybookExamples } from './components/PlaybookExamples';
 
 type Theme = 'light' | 'dark';
 
@@ -80,6 +81,7 @@ function App() {
 
       <main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 space-y-6">
         <DatasetSelector />
+        <PlaybookExamples />
         <QueryChat />
         <ResultsPanel />
       </main>

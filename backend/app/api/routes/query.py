@@ -98,6 +98,7 @@ async def execute_query(request: QueryRequest):
                 detail="Failed to plan analysis: invalid planner response",
             )
 
+        intent = analysis_request.get("intent", "overview")
         playbook_name = analysis_request.get("playbook", "overview")
         target = analysis_request.get("target")
         feature = analysis_request.get("feature")
@@ -216,7 +217,18 @@ async def execute_query(request: QueryRequest):
         analysis_context = play.get("analysis_context", {})
         merged_structure = {**data_structure, **analysis_context}
 
-        # Step 6: Optionally run secondary playbooks requested by the planner
+        # Step 6: Determine any default secondary playbooks based on INTENT
+        # (LLM may still override by explicitly setting secondary_playbooks.)
+        if not secondary_playbooks:
+            if intent == "drivers":
+                # For "drivers", pair the global correlation view with a focused
+                # feature_outcome_profile on the strongest driver.
+                secondary_playbooks = ["feature_outcome_profile"]
+            elif intent == "compare_groups":
+                # For group comparisons, a segmented distribution is often helpful.
+                secondary_playbooks = ["segmented_distribution"]
+
+        # Step 7: Optionally run secondary playbooks requested by the planner
         extra_visualizations: List[Dict[str, Any]] = []
         for secondary in secondary_playbooks:
             try:
@@ -244,9 +256,19 @@ async def execute_query(request: QueryRequest):
                     secondary_play = playbooks.outcome_breakdown_playbook(df, outcome=outcome_col)
                 elif secondary == "feature_outcome_profile":
                     outcome_col = target or "Outcome"
+                    # If we have top_correlations from the primary "drivers"
+                    # playbook, pick the strongest feature as the profile target.
+                    feature_for_profile = feature
+                    if analysis_context.get("kind") == "correlation":
+                        top_corrs = analysis_context.get("top_correlations") or {}
+                        if isinstance(top_corrs, dict) and top_corrs:
+                            feature_for_profile = max(
+                                top_corrs.keys(),
+                                key=lambda k: abs(top_corrs[k] or 0),
+                            )
                     secondary_play = playbooks.feature_outcome_profile_playbook(
                         df,
-                        feature=feature,
+                        feature=feature_for_profile,
                         outcome=outcome_col,
                         bins=bins or 8,
                     )
@@ -278,6 +300,8 @@ async def execute_query(request: QueryRequest):
                 results,
                 sql,
                 merged_structure,
+                visualization,
+                extra_visualizations,
             )
         except Exception as e:
             logger.error(f"Failed to generate analysis: {str(e)}")

@@ -379,12 +379,26 @@ def segment_comparison_playbook(
         },
     }
 
+    # Simple effect size if there are exactly two segments
+    effect_size: Optional[Dict[str, Any]] = None
+    if len(labels) == 2:
+        a, b = segment_values[0], segment_values[1]
+        diff = float(a) - float(b)
+        pct_diff = float(diff) / float(b) if b not in (0, None) else None
+        effect_size = {
+            "segment_a": labels[0],
+            "segment_b": labels[1],
+            "absolute_difference": round(diff, 3),
+            "relative_difference": round(pct_diff, 3) if pct_diff is not None else None,
+        }
+
     analysis_context = {
         "kind": "segment_comparison",
         "segment_column": segment_column,
         "segments": labels,
         "metric": metric_name,
         "values": segment_values,
+        "effect_size": effect_size,
     }
 
     return {
@@ -515,12 +529,29 @@ def feature_outcome_profile_playbook(
         },
     }
 
+    # Simple uplift between lowest and highest feature ranges
+    uplift: Optional[Dict[str, Any]] = None
+    if len(values) >= 2:
+        low = float(values[0])
+        high = float(values[-1])
+        diff = high - low
+        rel = diff / low if low not in (0, None) else None
+        uplift = {
+            "low_bin": labels[0],
+            "high_bin": labels[-1],
+            "low_rate": round(low, 3),
+            "high_rate": round(high, 3),
+            "absolute_uplift": round(diff, 3),
+            "relative_uplift": round(rel, 3) if rel is not None else None,
+        }
+
     analysis_context = {
         "kind": "feature_outcome_profile",
         "feature": feature,
         "outcome": outcome,
         "bins": labels,
         "values": values,
+        "uplift": uplift,
     }
 
     return {

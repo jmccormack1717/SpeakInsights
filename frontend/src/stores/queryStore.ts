@@ -12,6 +12,7 @@ interface QueryState {
   currentUserId: string;
   currentDatasetId: string | null;
   datasets: Dataset[];
+  presetQuestion: string | null;
   
   // Actions
   setLoading: (loading: boolean) => void;
@@ -20,6 +21,7 @@ interface QueryState {
   setUserId: (userId: string) => void;
   setDatasetId: (datasetId: string | null) => void;
   setDatasets: (datasets: Dataset[]) => void;
+  setPresetQuestion: (question: string | null) => void;
   reset: () => void;
 }
 
@@ -30,6 +32,7 @@ const initialState = {
   currentUserId: 'default_user',
   currentDatasetId: null,
   datasets: [],
+  presetQuestion: null,
 };
 
 export const useQueryStore = create<QueryState>((set) => ({
@@ -41,6 +44,7 @@ export const useQueryStore = create<QueryState>((set) => ({
   setUserId: (userId) => set({ currentUserId: userId }),
   setDatasetId: (datasetId) => set({ currentDatasetId: datasetId }),
   setDatasets: (datasets) => set({ datasets }),
+  setPresetQuestion: (presetQuestion) => set({ presetQuestion }),
   reset: () => set(initialState),
 }));
 

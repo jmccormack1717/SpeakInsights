@@ -1,5 +1,5 @@
 /** Main query chat interface */
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Send, Loader2 } from 'lucide-react';
 import { useQueryStore } from '../stores/queryStore';
 import { queryApi } from '../services/api';
@@ -13,8 +13,19 @@ export function QueryChat() {
     setError, 
     setResponse,
     currentUserId,
-    currentDatasetId 
+    currentDatasetId,
+    presetQuestion,
+    setPresetQuestion,
   } = useQueryStore();
+
+  // If another component sets a preset question (e.g. from examples),
+  // populate the input with it.
+  useEffect(() => {
+    if (presetQuestion) {
+      setQuestion(presetQuestion);
+      setPresetQuestion(null);
+    }
+  }, [presetQuestion, setPresetQuestion]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -57,6 +68,7 @@ export function QueryChat() {
       <form onSubmit={handleSubmit} className="flex flex-col sm:flex-row gap-3">
         <div className="flex-1 relative">
           <input
+            id="query-input"
             type="text"
             value={question}
             onChange={(e) => setQuestion(e.target.value)}

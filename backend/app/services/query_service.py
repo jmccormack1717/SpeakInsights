@@ -27,15 +27,24 @@ class QueryService:
         lower_query = user_query.lower()
 
         playbook_descriptions = """
-Available playbooks:
+Available analysis INTENTS (high-level goals):
 - "overview": High-level description of the dataset (size, key numeric features, ranges, missingness).
-- "correlation": Identify numeric features most strongly related to a target column.
+- "drivers": What features are most strongly related to an outcome/target overall.
 - "distribution": Explore the distribution and outliers for a single numeric feature.
-- "segment_comparison": Compare two cohorts (e.g. outcome=1 vs outcome=0) on a key metric.
+- "relationship": Show how two numeric features relate to each other (scatter / curve).
+- "compare_groups": Compare two or more cohorts/groups on a key metric.
 - "outcome_breakdown": Show how often each outcome/target class occurs (class balance).
-- "feature_outcome_profile": Show how outcome rate changes across the range of a numeric feature.
-- "relationship": Show how two numeric features relate to each other (scatter plot).
-- "segmented_distribution": Show how a numeric feature differs across groups/segments.
+- "segment_drilldown": Zoom into a particular segment (e.g. only Outcome=1, or Age>60) and summarize it.
+
+These intents are implemented using the following PLAYBOOKS (deterministic Python code):
+- "overview": dataset_overview_playbook
+- "correlation": drivers_playbook (top-N correlations with a target)
+- "distribution": distribution_playbook (histograms)
+- "relationship": relationship_playbook (scatter)
+- "segment_comparison": segment_comparison_playbook (compare_groups)
+- "outcome_breakdown": outcome_breakdown_playbook
+- "feature_outcome_profile": feature_outcome_profile_playbook (risk curve)
+- "segmented_distribution": segmented_distribution_playbook
 
 You can also set numeric detail parameters when relevant:
 - "top_n": how many top items to show (e.g. top 10 correlated features).
@@ -60,6 +69,7 @@ User question: "{user_query}"
 
 Return a JSON object ONLY, with this structure:
 {{
+  "intent": "overview" | "drivers" | "distribution" | "relationship" | "compare_groups" | "outcome_breakdown" | "segment_drilldown",
   "playbook": "overview" | "correlation" | "distribution" | "segment_comparison" | "outcome_breakdown" | "feature_outcome_profile" | "relationship" | "segmented_distribution",
   "target": "column_name or null",              // for correlation, outcome_breakdown & feature_outcome_profile
   "feature": "column_name or null",             // for distribution & feature_outcome_profile (numeric)
@@ -75,20 +85,20 @@ Return a JSON object ONLY, with this structure:
 }}
 
 Rules:
-- Use "overview" when the user asks to describe or summarize the dataset or data overall.
-- Use "correlation" when the user asks which features/columns are most related to an outcome or target.
-- Use "distribution" when the user asks about the spread, range, outliers, or histogram of a single numeric column.
-- Use "segment_comparison" when the user asks to compare two groups or cohorts (e.g. outcome=1 vs outcome=0, men vs women).
-- Use "outcome_breakdown" when the user asks how often the outcome/target occurs, or for class balance / base rate.
-- Use "feature_outcome_profile" when the user asks how the outcome changes as a feature increases/decreases (e.g. outcome vs glucose levels).
-- Use "relationship" when the user asks how two specific numeric features relate to each other (e.g. pregnancies vs age).
-- Use "segmented_distribution" when the user asks how the distribution of a feature differs across groups (e.g. glucose by outcome).
+- Choose INTENT first based on the user question, then choose an appropriate PLAYBOOK.
+- Use "overview" intent when the user asks to describe or summarize the dataset or data overall.
+- Use "drivers" intent when the user asks which features/columns are most related to an outcome or target overall.
+- Use "distribution" intent when the user asks about the spread, range, outliers, or histogram of a single numeric column.
+- Use "relationship" intent when the user asks how two specific numeric features relate to each other (e.g. pregnancies vs age).
+- Use "compare_groups" intent when the user asks to compare two groups or cohorts (e.g. outcome=1 vs outcome=0, men vs women).
+- Use "outcome_breakdown" intent when the user asks how often the outcome/target occurs, or for class balance / base rate.
+- Use "segment_drilldown" intent when the user restricts analysis to a group (e.g. only Outcome=1, or only Age > 60) and wants that segment summarized.
 - When the user mentions a specific count like "top 3" or "top 10", set "top_n" accordingly (within 3-20).
 - When the user asks for more or fewer "buckets" / "ranges" / "granularity", adjust "bins" between 5 and 30.
- - Use "filter_segment" when the user restricts analysis to a group (e.g. only Outcome=1, or only Age > 60).
- - Use "focus_range" when the user specifies a value range of interest for a numeric feature (e.g. glucose between 80 and 200).
+- Use "filter_segment" when the user restricts analysis to a group (e.g. only Outcome=1, or only Age > 60).
+- Use "focus_range" when the user specifies a value range of interest for a numeric feature (e.g. glucose between 80 and 200).
 - Only set "secondary_playbooks" when clearly useful; otherwise omit or set it to null.
-- For "correlation", choose a numeric column that looks like the outcome/target (e.g., a binary label) if possible.
+- For "drivers"/correlation, choose a numeric column that looks like the outcome/target (e.g., a binary label) if possible.
 - Default mode is "quick" unless the user clearly asks for very detailed or deep analysis.
 - If you are unsure of a column to use for a given playbook, set its field to null and let the backend fall back safely.
 """
@@ -115,7 +125,8 @@ Rules:
                 "mode": "quick",
             }
 
-        playbook = response.get("playbook", "overview")
+        intent = response.get("intent", "overview")
+        playbook = response.get("playbook")  # may be None; we'll map from intent if needed
         target = response.get("target")
         feature = response.get("feature")
         segment_column = response.get("segment_column")
@@ -129,6 +140,18 @@ Rules:
         mode = response.get("mode", "quick")
 
         # Basic validation and fallbacks
+        allowed_intents = {
+            "overview",
+            "drivers",
+            "distribution",
+            "relationship",
+            "compare_groups",
+            "outcome_breakdown",
+            "segment_drilldown",
+        }
+        if intent not in allowed_intents:
+            intent = "overview"
+
         allowed_playbooks = {
             "overview",
             "correlation",
@@ -139,13 +162,25 @@ Rules:
             "relationship",
             "segmented_distribution",
         }
+
+        # Map INTENT → default PLAYBOOK if playbook is missing or invalid
+        intent_to_playbook = {
+            "overview": "overview",
+            "drivers": "correlation",
+            "distribution": "distribution",
+            "relationship": "relationship",
+            "compare_groups": "segment_comparison",
+            "outcome_breakdown": "outcome_breakdown",
+            "segment_drilldown": "overview",  # for now, a filtered overview
+        }
+
         if playbook not in allowed_playbooks:
-            playbook = "overview"
+            playbook = intent_to_playbook.get(intent, "overview")
 
         # Common candidate names for "outcome-like" targets
         candidate_names = {"outcome", "target", "label", "y"}
 
-        # Heuristic: if correlation or outcome_breakdown was requested but target is missing,
+        # Heuristic: if drivers/correlation or outcome_breakdown was requested but target is missing,
         # try to infer a reasonable default from schema table names / columns.
         if playbook in {"correlation", "outcome_breakdown"} and not target:
             for table in schema_info.get("tables", []):
@@ -215,6 +250,7 @@ Rules:
 
         # Final, fully validated analysis request
         return {
+            "intent": intent,
             "playbook": playbook,
             "target": target,
             "feature": feature,

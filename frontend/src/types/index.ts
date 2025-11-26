@@ -61,6 +61,7 @@ export interface TextualAnalysis {
   key_findings: string[];
   patterns: string[];
   recommendations: string[];
+  follow_ups?: string[];
 }
 
 export interface DataStructure {
