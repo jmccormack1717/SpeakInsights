@@ -139,15 +139,12 @@ function App() {
         {/* Modern, centered auth card (login/signup + demo), à la Scheme/Microsoft */}
         <main className="flex-1 flex items-center justify-center px-4 sm:px-6 py-10 sm:py-16">
           <div className="w-full max-w-md space-y-6">
-            <div className="text-center space-y-2">
+            <div className="text-center space-y-1">
               <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-si-text">
                 Ask questions about your data,
               </h2>
-              <p className="text-base font-semibold text-si-primary">
+              <p className="text-2xl sm:text-3xl font-extrabold tracking-tight text-si-primary">
                 get instant charts &amp; insights.
-              </p>
-              <p className="text-xs sm:text-sm text-si-muted">
-                Log in to use your own datasets, or start with the PIMA demo—one clean place to talk to your data.
               </p>
             </div>
 

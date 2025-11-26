@@ -77,9 +77,6 @@ export function AuthPanel({ onAuthenticated, onStartDemo }: AuthPanelProps) {
           <h2 className="text-lg sm:text-xl font-semibold text-si-text">
             {mode === 'login' ? 'Sign in to SpeakInsights' : 'Create your SpeakInsights account'}
           </h2>
-          <p className="text-xs sm:text-sm text-si-muted">
-            Use your own space while keeping the demo-friendly PIMA dataset.
-          </p>
         </div>
       </div>
 
