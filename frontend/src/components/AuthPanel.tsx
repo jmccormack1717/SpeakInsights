@@ -151,16 +151,16 @@ export function AuthPanel({ onAuthenticated, onStartDemo }: AuthPanelProps) {
         </div>
       </form>
 
-      <div className="pt-3 border-t border-si-border/60 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+      <div className="pt-4 border-t border-si-border/60 space-y-3 text-center">
         <p className="text-[11px] sm:text-xs text-si-muted">
-          Or, explore instantly with the built-in demo dataset.
+          Just want to see it in action first?
         </p>
         <button
           type="button"
           onClick={onStartDemo}
-          className="inline-flex items-center gap-1.5 rounded-full border border-si-primary/70 text-si-primary px-3.5 py-1.5 text-[11px] sm:text-xs font-medium hover:bg-si-primary-soft/40"
+          className="inline-flex items-center justify-center gap-2 rounded-full bg-gradient-to-r from-si-primary to-si-primary-strong text-white px-6 py-2.5 text-xs sm:text-sm font-medium shadow-md hover:shadow-lg"
         >
-          <PlayCircle className="w-3.5 h-3.5" />
+          <PlayCircle className="w-4 h-4" />
           <span>Start instant demo</span>
         </button>
       </div>
