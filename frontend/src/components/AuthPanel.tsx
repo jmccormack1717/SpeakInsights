@@ -7,7 +7,11 @@ import { useQueryStore } from '../stores/queryStore';
 
 type Mode = 'login' | 'signup';
 
-export function AuthPanel() {
+interface AuthPanelProps {
+  onAuthenticated?: () => void;
+}
+
+export function AuthPanel({ onAuthenticated }: AuthPanelProps) {
   const [mode, setMode] = useState<Mode>('login');
   const [email, setEmail] = useState('');
   const [fullName, setFullName] = useState('');
@@ -37,6 +41,7 @@ export function AuthPanel() {
           res.access_token,
         );
         setUserId(res.user_id);
+        onAuthenticated?.();
       } else {
         const res = await authApi.login(email, password);
         setAuth(
@@ -48,6 +53,7 @@ export function AuthPanel() {
           res.access_token,
         );
         setUserId(res.user_id);
+        onAuthenticated?.();
       }
     } catch (err: any) {
       const msg =

@@ -1,7 +1,8 @@
-/** Results panel showing visualization and analysis */
+/** Results panel showing visualization and analysis in a chat-like layout */
 import { useQueryStore } from '../stores/queryStore';
 import { ChartRenderer } from './ChartRenderer';
 import { AnalysisPanel } from './AnalysisPanel';
+import { QueryChat } from './QueryChat';
 import { Loader2 } from 'lucide-react';
 
 export function ResultsPanel() {
@@ -46,73 +47,81 @@ export function ResultsPanel() {
     );
   }
 
-  if (!hasTurns) {
-    return (
-      <div className="w-full mt-8 text-center py-12">
-        <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-si-primary-soft mb-4">
-          <svg className="w-8 h-8 text-si-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-          </svg>
-        </div>
-        <p className="text-si-muted text-lg">Ask a question to see insights</p>
-        <p className="text-si-muted text-sm mt-2">We\'ll analyze your data and show a visual story</p>
-      </div>
-    );
-  }
-
   return (
     <div className="w-full mt-6 space-y-4">
-      {history.map((turn, idx) => {
-        const isLast = idx === history.length - 1;
-        const response = turn.response;
-        const secondaryCharts = response?.extra_visualizations || [];
+      {/* Conversation history */}
+      {hasTurns ? (
+        history.map((turn, idx) => {
+          const isLast = idx === history.length - 1;
+          const response = turn.response;
+          const secondaryCharts = response?.extra_visualizations || [];
 
-        return (
-          <div
-            key={turn.id}
-            className="space-y-3 border border-si-border/60 rounded-2xl bg-si-surface/60 shadow-sm p-4 sm:p-5"
-          >
-            {/* User question */}
-            <div className="flex justify-end">
-              <div className="max-w-[80%] rounded-2xl bg-si-primary text-white px-4 py-2 text-sm shadow-sm">
-                {turn.question}
-              </div>
-            </div>
-
-            {/* Loading state for this turn */}
-            {!response && isLast && isLoading && (
-              <div className="flex items-center gap-2 text-xs text-si-muted mt-1">
-                <Loader2 className="w-4 h-4 animate-spin text-si-primary" />
-                <span>Analyzing your data for this question…</span>
-              </div>
-            )}
-
-            {/* Response content when ready */}
-            {response && (
-              <div className="space-y-4">
-                <div className="bg-si-elevated rounded-2xl shadow-si-soft border border-si-border/70 p-4 sm:p-6">
-                  <ChartRenderer config={response.visualization} />
+          return (
+            <div
+              key={turn.id}
+              className="space-y-3 border border-si-border/60 rounded-2xl bg-si-surface/60 shadow-sm p-4 sm:p-5"
+            >
+              {/* User question */}
+              <div className="flex justify-end">
+                <div className="max-w-[80%] rounded-2xl bg-si-primary text-white px-4 py-2 text-sm shadow-sm">
+                  {turn.question}
                 </div>
-
-                {secondaryCharts.length > 0 && (
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {secondaryCharts.map((viz, vIdx) => (
-                      <div
-                        key={vIdx}
-                        className="bg-si-surface rounded-2xl shadow-sm border border-si-border/60 p-4"
-                      >
-                        <ChartRenderer config={viz} />
-                      </div>
-                    ))}
-                  </div>
-                )}
-
-                <AnalysisPanel analysis={response.analysis} />
               </div>
-            )}
+
+              {/* Loading state for this turn */}
+              {!response && isLast && isLoading && (
+                <div className="flex items-center gap-2 text-xs text-si-muted mt-1">
+                  <Loader2 className="w-4 h-4 animate-spin text-si-primary" />
+                  <span>Analyzing your data for this question…</span>
+                </div>
+              )}
+
+              {/* Response content when ready */}
+              {response && (
+                <div className="space-y-4">
+                  <div className="bg-si-elevated rounded-2xl shadow-si-soft border border-si-border/70 p-4 sm:p-6">
+                    <ChartRenderer config={response.visualization} />
+                  </div>
+
+                  {secondaryCharts.length > 0 && (
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      {secondaryCharts.map((viz, vIdx) => (
+                        <div
+                          key={vIdx}
+                          className="bg-si-surface rounded-2xl shadow-sm border border-si-border/60 p-4"
+                        >
+                          <ChartRenderer config={viz} />
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  <AnalysisPanel analysis={response.analysis} />
+                </div>
+              )}
+            </div>
+          );
+        })
+      ) : (
+        <div className="w-full mt-4 text-center py-10 border border-dashed border-si-border/60 rounded-2xl bg-si-surface/40">
+          <div className="inline-flex items-center justify-center w-14 h-14 rounded-full bg-si-primary-soft mb-3">
+            <svg className="w-7 h-7 text-si-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm3 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2"
+              />
+            </svg>
           </div>
-        );
-      })}
+          <p className="text-si-muted text-sm sm:text-base">Ask your first question to start a conversation.</p>
+        </div>
+      )}
+
+      {/* Input at the bottom, like a chat composer */}
+      <div className="sticky bottom-0 pt-2 bg-si-bg/80 backdrop-blur-xs">
+        <QueryChat />
+      </div>
     </div>
   );
 }
