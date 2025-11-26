@@ -32,7 +32,11 @@ function correlationToColor(value: number): string {
 }
 
 export function ChartRenderer({ config }: { config: VisualizationConfig }) {
-  const { type, data, config: chartConfig } = config;
+  const { type, data, config: chartConfig, metadata } = config;
+
+  // Common axis label helpers with sensible fallbacks
+  const xAxisLabel = chartConfig.xLabel || metadata?.x_axis || undefined;
+  const yAxisLabel = chartConfig.yLabel || metadata?.y_axis || undefined;
 
   // Prepare data for Recharts
   const chartData = prepareChartData(data, type);
@@ -47,17 +51,42 @@ export function ChartRenderer({ config }: { config: VisualizationConfig }) {
           )}
           <div className="h-96">
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={chartData} layout={type === 'horizontal_bar' ? 'vertical' : 'horizontal'} margin={{ top: 20, right: 30, left: 20, bottom: 20 }}>
+              <BarChart
+                data={chartData}
+                layout={type === 'horizontal_bar' ? 'vertical' : 'horizontal'}
+                margin={{ top: 20, right: 30, left: 20, bottom: 40 }}
+              >
                 <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" opacity={0.3} />
                 <XAxis 
                   dataKey={type === 'horizontal_bar' ? 'value' : 'name'}
                   stroke="#6b7280"
                   tick={{ fill: '#6b7280' }}
+                  label={
+                    xAxisLabel
+                      ? {
+                          value: xAxisLabel,
+                          position: type === 'horizontal_bar' ? 'insideTopRight' : 'insideBottom',
+                          offset: type === 'horizontal_bar' ? 0 : -10,
+                          fill: '#6b7280',
+                        }
+                      : undefined
+                  }
                 />
                 <YAxis 
                   dataKey={type === 'horizontal_bar' ? 'name' : 'value'}
                   stroke="#6b7280"
                   tick={{ fill: '#6b7280' }}
+                  label={
+                    yAxisLabel
+                      ? {
+                          value: yAxisLabel,
+                          angle: -90,
+                          position: 'insideLeft',
+                          offset: 10,
+                          fill: '#6b7280',
+                        }
+                      : undefined
+                  }
                 />
                 <Tooltip
                   cursor={false}
@@ -86,7 +115,7 @@ export function ChartRenderer({ config }: { config: VisualizationConfig }) {
           )}
           <div className="h-80">
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={chartData} margin={{ top: 10, right: 24, left: 16, bottom: 24 }}>
+              <BarChart data={chartData} margin={{ top: 10, right: 24, left: 16, bottom: 40 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" opacity={0.3} />
                 <XAxis
                   dataKey="name"
@@ -95,10 +124,31 @@ export function ChartRenderer({ config }: { config: VisualizationConfig }) {
                   angle={-20}
                   textAnchor="end"
                   height={60}
+                  label={
+                    xAxisLabel
+                      ? {
+                          value: xAxisLabel,
+                          position: 'insideBottom',
+                          offset: -5,
+                          fill: '#6b7280',
+                        }
+                      : undefined
+                  }
                 />
                 <YAxis
                   stroke="#6b7280"
                   tick={{ fill: '#6b7280' }}
+                  label={
+                    yAxisLabel
+                      ? {
+                          value: yAxisLabel,
+                          angle: -90,
+                          position: 'insideLeft',
+                          offset: 10,
+                          fill: '#6b7280',
+                        }
+                      : undefined
+                  }
                 />
                 <Tooltip
                   cursor={false}
@@ -125,16 +175,37 @@ export function ChartRenderer({ config }: { config: VisualizationConfig }) {
           )}
           <div className="h-96">
             <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={chartData} margin={{ top: 20, right: 30, left: 20, bottom: 20 }}>
+              <LineChart data={chartData} margin={{ top: 20, right: 30, left: 20, bottom: 40 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" opacity={0.3} />
                 <XAxis 
                   dataKey="x"
                   stroke="#6b7280"
                   tick={{ fill: '#6b7280' }}
+                  label={
+                    xAxisLabel
+                      ? {
+                          value: xAxisLabel,
+                          position: 'insideBottom',
+                          offset: -10,
+                          fill: '#6b7280',
+                        }
+                      : undefined
+                  }
                 />
                 <YAxis 
                   stroke="#6b7280"
                   tick={{ fill: '#6b7280' }}
+                  label={
+                    yAxisLabel
+                      ? {
+                          value: yAxisLabel,
+                          angle: -90,
+                          position: 'insideLeft',
+                          offset: 10,
+                          fill: '#6b7280',
+                        }
+                      : undefined
+                  }
                 />
                 <Tooltip
                   cursor={false}
@@ -208,19 +279,40 @@ export function ChartRenderer({ config }: { config: VisualizationConfig }) {
           </h3>
           <div className="h-96">
             <ResponsiveContainer width="100%" height="100%">
-              <ScatterChart margin={{ top: 20, right: 30, left: 20, bottom: 20 }}>
+              <ScatterChart margin={{ top: 20, right: 30, left: 20, bottom: 40 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" opacity={0.3} />
                 <XAxis
                   dataKey="x"
                   name={chartConfig.xLabel}
                   stroke="#6b7280"
                   tick={{ fill: '#6b7280' }}
+                  label={
+                    xAxisLabel
+                      ? {
+                          value: xAxisLabel,
+                          position: 'insideBottom',
+                          offset: -10,
+                          fill: '#6b7280',
+                        }
+                      : undefined
+                  }
                 />
                 <YAxis
                   dataKey="y"
                   name={chartConfig.yLabel}
                   stroke="#6b7280"
                   tick={{ fill: '#6b7280' }}
+                  label={
+                    yAxisLabel
+                      ? {
+                          value: yAxisLabel,
+                          angle: -90,
+                          position: 'insideLeft',
+                          offset: 10,
+                          fill: '#6b7280',
+                        }
+                      : undefined
+                  }
                 />
                 <Tooltip
                   cursor={{ strokeDasharray: '3 3' }}
