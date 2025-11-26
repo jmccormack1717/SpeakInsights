@@ -1,6 +1,6 @@
 /** Panel displaying textual analysis and insights */
 import type { TextualAnalysis } from '../types';
-import { Lightbulb, TrendingUp, AlertCircle, Sparkles, MessageCircleMore } from 'lucide-react';
+import { Lightbulb, TrendingUp, AlertCircle, Sparkles, MessageCircle } from 'lucide-react';
 
 export function AnalysisPanel({ analysis }: { analysis: TextualAnalysis }) {
   return (
@@ -80,7 +80,7 @@ export function AnalysisPanel({ analysis }: { analysis: TextualAnalysis }) {
       {analysis.follow_ups && analysis.follow_ups.length > 0 && (
         <div className="pt-4 border-t border-gray-100">
           <h3 className="text-sm font-semibold mb-2 flex items-center gap-2 text-gray-800">
-            <MessageCircleMore className="w-4 h-4 text-si-primary" />
+            <MessageCircle className="w-4 h-4 text-si-primary" />
             Helpful follow-up questions
           </h3>
           <ul className="flex flex-wrap gap-2">
