@@ -1,4 +1,4 @@
-/** Simple authentication card for signup / login */
+/** Simple authentication card used on the launch page (login OR signup). */
 import { useState } from 'react';
 import { Lock, LogIn, UserPlus, Mail } from 'lucide-react';
 import { authApi } from '../services/api';
@@ -8,11 +8,11 @@ import { useQueryStore } from '../stores/queryStore';
 type Mode = 'login' | 'signup';
 
 interface AuthPanelProps {
+  mode: Mode;
   onAuthenticated?: () => void;
 }
 
-export function AuthPanel({ onAuthenticated }: AuthPanelProps) {
-  const [mode, setMode] = useState<Mode>('login');
+export function AuthPanel({ mode, onAuthenticated }: AuthPanelProps) {
   const [email, setEmail] = useState('');
   const [fullName, setFullName] = useState('');
   const [password, setPassword] = useState('');
@@ -81,27 +81,18 @@ export function AuthPanel({ onAuthenticated }: AuthPanelProps) {
             </p>
           </div>
         </div>
-        <div className="inline-flex rounded-full bg-si-bg border border-si-border/80 p-0.5 text-[12px] sm:text-xs">
-          <button
-            type="button"
-            onClick={() => setMode('login')}
-            className={`px-3 py-1.5 rounded-full flex items-center gap-1.5 ${
-              mode === 'login' ? 'bg-si-primary text-white' : 'text-si-muted'
-            }`}
-          >
-            <LogIn className="w-3.5 h-3.5" />
-            <span>Sign in</span>
-          </button>
-          <button
-            type="button"
-            onClick={() => setMode('signup')}
-            className={`px-3 py-1.5 rounded-full flex items-center gap-1.5 ${
-              mode === 'signup' ? 'bg-si-primary text-white' : 'text-si-muted'
-            }`}
-          >
-            <UserPlus className="w-3.5 h-3.5" />
-            <span>Sign up</span>
-          </button>
+        <div className="inline-flex rounded-full bg-si-bg border border-si-border/80 px-3 py-1.5 text-[12px] sm:text-xs text-si-muted">
+          {mode === 'login' ? (
+            <div className="inline-flex items-center gap-1.5 text-si-primary">
+              <LogIn className="w-3.5 h-3.5" />
+              <span className="font-medium">Login</span>
+            </div>
+          ) : (
+            <div className="inline-flex items-center gap-1.5 text-si-primary">
+              <UserPlus className="w-3.5 h-3.5" />
+              <span className="font-medium">Sign up</span>
+            </div>
+          )}
         </div>
       </div>
 

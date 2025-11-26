@@ -117,35 +117,46 @@ function App() {
     return (
       <div className="min-h-screen bg-si-bg text-si-text transition-colors duration-300 flex flex-col">
         {header}
-        {/* Clean single-column launch page: intro text with sign-in directly underneath */}
-        <main className="flex-1 max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-14 space-y-8 sm:space-y-10">
-          <section className="space-y-5 text-left">
+        {/* Clean launch page with three primary actions: Try demo, Login, Sign up */}
+        <main className="flex-1 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-16 space-y-10">
+          {/* Intro copy */}
+          <section className="space-y-4 text-center sm:text-left">
             <h2 className="text-3xl sm:text-5xl font-extrabold tracking-tight text-si-text leading-tight">
               <span className="block">Ask questions about your data,</span>
               <span className="block text-si-primary">get instant charts & insights.</span>
             </h2>
-            <p className="text-sm sm:text-base text-si-muted max-w-2xl">
-              Drop in a CSV or start with the built-in PIMA demo dataset. SpeakInsights turns your natural-language
-              questions into visual summaries and AI-written analysis, so you can understand your data in seconds.
+            <p className="text-sm sm:text-base text-si-muted max-w-2xl mx-auto sm:mx-0">
+              Start with the built-in PIMA demo dataset or bring your own CSV. SpeakInsights turns your natural-language
+              questions into visual summaries and AI-written analysis.
             </p>
+          </section>
 
-            <div className="flex flex-wrap items-center gap-3">
+          {/* Three main actions */}
+          <section className="grid gap-6 sm:gap-8 md:grid-cols-2 lg:grid-cols-3 items-start">
+            {/* Try instant demo */}
+            <div className="bg-si-surface rounded-2xl border border-si-border/70 shadow-md p-6 flex flex-col justify-between">
+              <div className="space-y-3">
+                <h3 className="text-base sm:text-lg font-semibold text-si-text">Try instant demo</h3>
+                <p className="text-xs sm:text-sm text-si-muted">
+                  Jump straight into the app with a pre-loaded medical dataset. No signup required—perfect for a quick
+                  tour.
+                </p>
+              </div>
               <button
                 type="button"
                 onClick={handleStartDemo}
-                className="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-si-primary to-si-primary-strong text-white px-5 py-2.5 text-sm font-medium shadow-md hover:shadow-lg"
+                className="mt-5 inline-flex items-center justify-center gap-2 rounded-full bg-gradient-to-r from-si-primary to-si-primary-strong text-white px-4 py-2.5 text-sm font-medium shadow-md hover:shadow-lg"
               >
                 <PlayCircle className="w-4 h-4" />
-                <span>Try instant demo</span>
+                <span>Start demo</span>
               </button>
-              <span className="text-xs sm:text-sm text-si-muted">
-                No sign-in required. Or create an account below to keep your own datasets.
-              </span>
             </div>
-          </section>
 
-          <section className="space-y-4">
-            <AuthPanel onAuthenticated={handleStartDemo} />
+            {/* Login */}
+            <AuthPanel mode="login" onAuthenticated={handleStartDemo} />
+
+            {/* Sign up */}
+            <AuthPanel mode="signup" onAuthenticated={handleStartDemo} />
           </section>
         </main>
       </div>
