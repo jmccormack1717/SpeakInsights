@@ -24,6 +24,9 @@ export function QueryChat() {
       return;
     }
 
+    // Clear any previous response so the user sees a fresh loading state
+    setResponse(null);
+
     setLoading(true);
     setError(null);
 

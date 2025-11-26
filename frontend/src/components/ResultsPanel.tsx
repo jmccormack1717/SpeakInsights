@@ -2,9 +2,28 @@
 import { useQueryStore } from '../stores/queryStore';
 import { ChartRenderer } from './ChartRenderer';
 import { AnalysisPanel } from './AnalysisPanel';
+import { Loader2 } from 'lucide-react';
 
 export function ResultsPanel() {
-  const { currentResponse, error } = useQueryStore();
+  const { currentResponse, error, isLoading } = useQueryStore();
+
+  if (isLoading) {
+    return (
+      <div className="w-full mt-8 py-12 flex flex-col items-center justify-center gap-4 bg-si-surface rounded-2xl border border-si-border/70 shadow-si-soft">
+        <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-si-primary-soft">
+          <Loader2 className="w-6 h-6 text-si-primary animate-spin" />
+        </div>
+        <div className="text-center px-4 max-w-xl">
+          <p className="text-sm font-medium text-si-text">
+            Analyzing your dataset and preparing visual insights...
+          </p>
+          <p className="text-xs text-si-muted mt-1">
+            We&apos;re running analysis playbooks on your data and choosing charts that best match your question.
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   if (error) {
     return (

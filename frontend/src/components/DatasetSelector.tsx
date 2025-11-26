@@ -159,6 +159,12 @@ export function DatasetSelector() {
         </label>
       </div>
 
+      {isUploading && (
+        <p className="text-xs text-si-muted">
+          Importing and indexing your CSV. This may take a few moments for larger files.
+        </p>
+      )}
+
       {/* Active dataset summary */}
       <div className="text-xs text-si-muted">
         <span className="font-medium text-si-text">Active:</span>{' '}
