@@ -117,8 +117,8 @@ function App() {
     return (
       <div className="min-h-screen bg-si-bg text-si-text transition-colors duration-300 flex flex-col">
         {header}
-        <main className="flex-1 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-14 grid gap-8 lg:grid-cols-[minmax(0,1.3fr)_minmax(0,1fr)] items-start">
-          <section className="space-y-6">
+        <main className="flex-1 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-14 grid gap-8 lg:grid-cols-2 items-stretch">
+          <section className="space-y-6 flex flex-col justify-center">
             <h2 className="text-3xl sm:text-4xl font-bold tracking-tight text-si-text">
               Ask questions about your data,
               <span className="text-si-primary"> get instant charts & insights.</span>
@@ -143,8 +143,10 @@ function App() {
             </div>
           </section>
 
-          <section className="space-y-4">
-            <AuthPanel onAuthenticated={handleStartDemo} />
+          <section className="space-y-4 flex flex-col justify-center">
+            <div className="max-w-md w-full mx-auto">
+              <AuthPanel onAuthenticated={handleStartDemo} />
+            </div>
           </section>
         </main>
       </div>
