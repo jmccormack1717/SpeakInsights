@@ -66,7 +66,7 @@ export function AuthPanel({ onAuthenticated }: AuthPanelProps) {
   };
 
   return (
-    <div className="w-full bg-si-surface rounded-2xl border border-si-border/70 shadow-md p-6 sm:p-8">
+    <div className="w-full bg-si-surface rounded-2xl border border-si-border/70 shadow-md p-6 sm:p-8 min-h-[260px] sm:min-h-[300px]">
       <div className="flex items-center justify-between gap-4 mb-4">
         <div className="flex items-center gap-3">
           <div className="w-9 h-9 rounded-lg bg-si-primary-soft flex items-center justify-center">
