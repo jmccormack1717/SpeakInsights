@@ -117,19 +117,19 @@ function App() {
     return (
       <div className="min-h-screen bg-si-bg text-si-text transition-colors duration-300 flex flex-col">
         {header}
-        {/* Landing hero with plenty of whitespace; wide hero copy on the left and large auth card on the right */}
-        <main className="flex-1 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-14 grid gap-10 lg:grid-cols-[minmax(0,1.4fr)_minmax(0,1.2fr)] items-stretch">
-          <section className="space-y-6 flex flex-col justify-center">
-            <h2 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-si-text leading-snug max-w-3xl">
+        {/* Clean single-column launch page: intro text with sign-in directly underneath */}
+        <main className="flex-1 max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-14 space-y-8 sm:space-y-10">
+          <section className="space-y-5 text-left">
+            <h2 className="text-3xl sm:text-5xl font-extrabold tracking-tight text-si-text leading-tight">
               <span className="block">Ask questions about your data,</span>
               <span className="block text-si-primary">get instant charts & insights.</span>
             </h2>
             <p className="text-sm sm:text-base text-si-muted max-w-2xl">
               Drop in a CSV or start with the built-in PIMA demo dataset. SpeakInsights turns your natural-language
-              questions into visual summaries and AI-written analysis.
+              questions into visual summaries and AI-written analysis, so you can understand your data in seconds.
             </p>
 
-            <div className="flex flex-wrap gap-3">
+            <div className="flex flex-wrap items-center gap-3">
               <button
                 type="button"
                 onClick={handleStartDemo}
@@ -138,16 +138,14 @@ function App() {
                 <PlayCircle className="w-4 h-4" />
                 <span>Try instant demo</span>
               </button>
-              <span className="text-xs text-si-muted">
-                No sign-in required. Or create an account on the right to save your own datasets.
+              <span className="text-xs sm:text-sm text-si-muted">
+                No sign-in required. Or create an account below to keep your own datasets.
               </span>
             </div>
           </section>
 
-          <section className="space-y-4 flex flex-col justify-center">
-            <div className="max-w-3xl w-full mx-auto">
-              <AuthPanel onAuthenticated={handleStartDemo} />
-            </div>
+          <section className="space-y-4">
+            <AuthPanel onAuthenticated={handleStartDemo} />
           </section>
         </main>
       </div>
