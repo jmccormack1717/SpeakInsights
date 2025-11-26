@@ -110,7 +110,7 @@ export function ResultsPanel() {
                 strokeLinecap="round"
                 strokeLinejoin="round"
                 strokeWidth={2}
-                d="M6 20v-8a2 2 0 00-2-2H3a2 2 0 00-2 2v8a2 2 0 002 2h1a2 2 0 002-2zm7 0v-8a2 2 0 00-2-2h-1a2 2 0 00-2 2v8a2 2 0 002 2h1a2 2 0 002-2zm7 0v-8a2 2 0 00-2-2h-1a2 2 0 00-2 2v8a2 2 0 002 2h1a2 2 0 002-2z"
+                d="M5 20v-6a2 2 0 00-2-2H3a2 2 0 00-2 2v6a2 2 0 002 2h0a2 2 0 002-2zm8 0v-9a2 2 0 00-2-2h-1a2 2 0 00-2 2v9a2 2 0 002 2h1a2 2 0 002-2zm8 0v-12a2 2 0 00-2-2h-1a2 2 0 00-2 2v12a2 2 0 002 2h1a2 2 0 002-2z"
               />
             </svg>
           </div>
